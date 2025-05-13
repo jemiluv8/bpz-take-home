@@ -1,9 +1,9 @@
 <template>
   <div v-if="isDisabled" :class="containerClasses">
-    <component :is="ArrowComponent" class="w-4" />
+    <component :is="ArrowComponent" :size="20" />
   </div>
   <router-link v-else :to="href" :class="containerClasses">
-    <component :is="ArrowComponent" class="w-4" />
+    <component :is="ArrowComponent" :size="20" />
   </router-link>
 </template>
 
@@ -32,10 +32,10 @@ const props = defineProps({
 
 // Computed property for dynamic classes, similar to clsx
 const containerClasses = computed(() => [
-  'flex h-10 w-10 items-center justify-center rounded-md border', // Base classes
+  'flex h-8  w-12 items-center justify-center rounded-md border', // Base classes
   {
-    'pointer-events-none text-gray-300': props.isDisabled,
-    'hover:bg-gray-100': !props.isDisabled,
+    'pointer-events-none text-blue-300': props.isDisabled,
+    'hover:bg-blue-100': !props.isDisabled,
     'mr-2 md:mr-4': props.direction === 'left',
     'ml-2 md:ml-4': props.direction === 'right',
   },

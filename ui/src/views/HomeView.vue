@@ -1,5 +1,8 @@
 <script setup lang="ts">
 import Pagination from '@/components/Pagination.vue';
+import Spinner from '@/components/Spinner.vue';
+import { useQuery } from '@tanstack/vue-query';
+import { RefreshCcw } from 'lucide-vue-next'
 
 const invoices = [
   {
@@ -82,7 +85,10 @@ const formatCurrency = (amount: number) => {
   })
 }
 
-
+const { isLoading, isFetching, isError, data, error, refetch } = useQuery({
+  queryKey: ['todos'],
+  queryFn: () => fetch("https://dummyjson.com/product?limit=10").then(response => response.json()),
+})
 
 const formatDateToLocal = (
   dateStr: string,
@@ -103,11 +109,12 @@ const formatDateToLocal = (
   <main class="mt-12 h-full">
     <section class="flex justify-between mb-6 py-6">
       <h3 class="text-lg">Orders</h3>
-      <router-link to="/new-order" class="flex h-10 items-center rounded-lg bg-blue-600 transition-colors hover:bg-blue-500 focus-visible:outline focus-visible:outline-offset-2 focus-visible:outline-blue-600">
+      <button @click="$router.push('/new-order')" class="flex h-10 items-center rounded-lg bg-blue-600 transition-colors hover:bg-blue-500 focus-visible:outline focus-visible:outline-offset-2 focus-visible:outline-blue-600">
         <h1 class="text-white font-medium px-6">Create Order</h1>
-      </router-link>
+      </button>
     </section>
-    <table className="hidden min-w-full text-gray-900 md:table mt-6">
+    <Spinner v-if="isLoading || isFetching">Loading</Spinner>
+    <table v-else-if="!isError" className="hidden min-w-full text-gray-900 md:table mt-6">
       <thead className="rounded-lg text-left text-sm font-normal bg-gray-300">
         <tr>
           <th scope="col" className="px-4 py-5 font-bold sm:pl-6">Customer</th>
@@ -121,7 +128,7 @@ const formatDateToLocal = (
         </tr>
       </thead>
 
-      <tbody className="bg-white">
+      <tbody className="bg-white border-b">
         <tr
           v-for="invoice of invoices"
           :key="invoice.customer_id"
@@ -146,9 +153,17 @@ const formatDateToLocal = (
         </tr>
       </tbody>
 
-      <tfoot>
+      <tfoot class="pt-5 block w-full">
         <Pagination :total-pages="100" />
       </tfoot>
     </table>
+    <div class="flex flex-col justify-center align-middle items-center" v-else>
+      <p v-if="error && error.message">{{ error.message }}</p>
+      <h3 class="text-lg">There was an error loading data</h3> <br />
+      <button class="flex p-2 px-3 rounded-lg text-white bg-blue-600 hover:bg-blue-500 items-center" @click="() => refetch()">
+        <RefreshCcw :size="15" />
+        Try again
+      </button>
+    </div>
   </main>
 </template>
