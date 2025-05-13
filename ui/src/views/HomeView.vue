@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import Pagination from '@/components/Pagination.vue';
+
 const invoices = [
   {
     customer_id: 1,
@@ -143,6 +145,10 @@ const formatDateToLocal = (
           </td>
         </tr>
       </tbody>
+
+      <tfoot>
+        <Pagination :total-pages="100" />
+      </tfoot>
     </table>
   </main>
 </template>
