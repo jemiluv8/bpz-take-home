@@ -2,82 +2,11 @@
 import Pagination from '@/components/Pagination.vue';
 import Spinner from '@/components/Spinner.vue';
 import { useQuery } from '@tanstack/vue-query';
+import { useUrlSearchParams } from '@vueuse/core';
 import { RefreshCcw } from 'lucide-vue-next'
+import { computed } from "vue";
+import { useRoute } from 'vue-router';
 
-const invoices = [
-  {
-    customer_id: 1,
-    amount: 15795,
-    status: 'pending',
-    date: '2022-12-06',
-    name: 'Fred Stone',
-    email: "fred@stone.com"
-  },
-  {
-    customer_id: 2,
-    amount: 20348,
-    status: 'pending',
-    date: '2022-11-14',
-    name: 'Jenny Logan',
-    email: "jenny@logam.com"
-  },
-  {
-    customer_id: 3,
-    amount: 3040,
-    status: 'paid',
-    date: '2022-10-29',
-    name: 'Disney Walt',
-    email: 'walt@disney.com'
-  },
-  {
-    customer_id: 4,
-    amount: 44800,
-    status: 'paid',
-    date: '2023-09-10',
-    name: 'Cindy Sharon',
-    email: 'cindy@sharon.com'
-  },
-  {
-    customer_id: 5,
-    amount: 34577,
-    status: 'pending',
-    date: '2023-08-05',
-    name: 'Fred Stone',
-    email: 'cindy@sharon.com'
-  },
-  {
-    customer_id: 6,
-    amount: 54246,
-    status: 'pending',
-    date: '2023-07-16',
-    name: 'Fred Stone',
-    email: 'cindy@sharon.com'
-  },
-  {
-    customer_id: 7,
-    amount: 666,
-    status: 'pending',
-    date: '2023-06-27',
-    name: 'Fred Stone',
-    email: 'cindy@sharon.com'
-  },
-  {
-    customer_id: 8,
-    amount: 32545,
-    status: 'paid',
-    date: '2023-06-09',
-    name: 'Fred Stone',
-    email: 'cindy@sharon.com'
-  },
-  {
-    customer_id: 9,
-    amount: 1250,
-    status: 'paid',
-    date: '2023-06-17',
-    name: 'Fred Stone',
-    email: 'cindy@sharon.com'
-  },
-]
 const formatCurrency = (amount: number) => {
   return (amount / 100).toLocaleString('en-US', {
     style: 'currency',
@@ -85,9 +14,26 @@ const formatCurrency = (amount: number) => {
   })
 }
 
+const route = useRoute()
+const urlParams = useUrlSearchParams('history')
+const currentPage = computed({
+  get: () => Number(route.query.page) || 1,
+  set: (pageNumber: number) => {
+    urlParams.page = String(pageNumber)
+  },
+})
+
+const searchQuery = computed({
+  get: () => String(route.query.query || ''),
+  set: (query: string) => {
+    urlParams.query = query || "page=1";
+  },
+});
+
 const { isLoading, isFetching, isError, data, error, refetch } = useQuery({
-  queryKey: ['todos'],
-  queryFn: () => fetch("https://dummyjson.com/product?limit=10").then(response => response.json()),
+  staleTime: 5 * 60 * 1000,
+  queryKey: ['invoices', { page: currentPage }],
+  queryFn: () => fetch(`http://0.0.0.0:9909/invoices?page=${currentPage.value}`).then(response => response.json()),
 })
 
 const formatDateToLocal = (
@@ -103,6 +49,9 @@ const formatDateToLocal = (
   const formatter = new Intl.DateTimeFormat(locale, options);
   return formatter.format(date);
 };
+
+const totalPages = computed(() => data ? data.value.totalPages : 0)
+const invoices = computed(() => data ? data.value.data : [])
 </script>
 
 <template>
@@ -154,7 +103,7 @@ const formatDateToLocal = (
       </tbody>
 
       <tfoot class="pt-5 block w-full">
-        <Pagination :total-pages="100" />
+        <Pagination :total-pages="totalPages" />
       </tfoot>
     </table>
     <div class="flex flex-col justify-center align-middle items-center" v-else>
