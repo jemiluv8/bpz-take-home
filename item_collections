@@ -1,0 +1,2 @@
+A way to "pre_join" multiple collections to support queries that would've originally required a
+relational join. 
