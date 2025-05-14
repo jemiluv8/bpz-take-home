@@ -5,12 +5,13 @@ import { Express } from "express-serve-static-core";
 
 export function InvoiceRoutes(app: Express) {
   app.get("/invoices", async (req: Request, res: Response) => {
-    const { page = "1", query = "" } = req.query as {
+    const { page = "1", query = "", limit = "10" } = req.query as {
       page: string;
       query?: string;
+      limit?: string;
     };
 
-    const ITEMS_PER_PAGE = 3;
+    const ITEMS_PER_PAGE = Number(limit);
     const currentPage = Number(page) || 1;
     const offset = (currentPage - 1) * ITEMS_PER_PAGE;
 

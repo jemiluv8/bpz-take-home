@@ -1,0 +1,1354 @@
+{
+  "InvoicesTable": [
+    {
+      "PutRequest": {
+        "Item": {
+          "PK": {
+            "S": "CUSTOMER#balazs"
+          },
+          "SK": {
+            "S": "INVOICE#cdc7ad20"
+          },
+          "invoiceId": {
+            "S": "cdc7ad20"
+          },
+          "amount": {
+            "N": "34577"
+          },
+          "status": {
+            "S": "pending"
+          },
+          "date": {
+            "S": "2023-08-05"
+          },
+          "createdAt": {
+            "S": "2025-05-14T21:12:50.952713"
+          },
+          "customerName": {
+            "S": "Balazs Orban"
+          },
+          "customerEmail": {
+            "S": "balazs@orban.com"
+          },
+          "customerImageUrl": {
+            "S": "/customers/balazs-orban.png"
+          },
+          "GSI1PK": {
+            "S": "INVOICE"
+          },
+          "GSI1SK": {
+            "S": "status#pending#date#2023-08-05"
+          },
+          "GSI2PK": {
+            "S": "CUSTOMER#balazs"
+          },
+          "GSI2SK": {
+            "S": "status#pending#date#2023-08-05"
+          },
+          "GSI3PK": {
+            "S": "INVOICE#cdc7ad20"
+          },
+          "GSI3SK": {
+            "S": "CUSTOMER#balazs"
+          }
+        }
+      }
+    },
+    {
+      "PutRequest": {
+        "Item": {
+          "PK": {
+            "S": "CUSTOMER#balazs"
+          },
+          "SK": {
+            "S": "INVOICE#4f83079f"
+          },
+          "invoiceId": {
+            "S": "4f83079f"
+          },
+          "amount": {
+            "N": "8546"
+          },
+          "status": {
+            "S": "paid"
+          },
+          "date": {
+            "S": "2023-06-07"
+          },
+          "createdAt": {
+            "S": "2025-05-14T21:12:50.953109"
+          },
+          "customerName": {
+            "S": "Balazs Orban"
+          },
+          "customerEmail": {
+            "S": "balazs@orban.com"
+          },
+          "customerImageUrl": {
+            "S": "/customers/balazs-orban.png"
+          },
+          "GSI1PK": {
+            "S": "INVOICE"
+          },
+          "GSI1SK": {
+            "S": "status#paid#date#2023-06-07"
+          },
+          "GSI2PK": {
+            "S": "CUSTOMER#balazs"
+          },
+          "GSI2SK": {
+            "S": "status#paid#date#2023-06-07"
+          },
+          "GSI3PK": {
+            "S": "INVOICE#4f83079f"
+          },
+          "GSI3SK": {
+            "S": "CUSTOMER#balazs"
+          }
+        }
+      }
+    },
+    {
+      "PutRequest": {
+        "Item": {
+          "PK": {
+            "S": "CUSTOMER#amy"
+          },
+          "SK": {
+            "S": "INVOICE#84e74f91"
+          },
+          "invoiceId": {
+            "S": "84e74f91"
+          },
+          "amount": {
+            "N": "1250"
+          },
+          "status": {
+            "S": "paid"
+          },
+          "date": {
+            "S": "2023-06-17"
+          },
+          "createdAt": {
+            "S": "2025-05-14T21:12:50.953358"
+          },
+          "customerName": {
+            "S": "Amy Burns"
+          },
+          "customerEmail": {
+            "S": "amy@burns.com"
+          },
+          "customerImageUrl": {
+            "S": "/customers/amy-burns.png"
+          },
+          "GSI1PK": {
+            "S": "INVOICE"
+          },
+          "GSI1SK": {
+            "S": "status#paid#date#2023-06-17"
+          },
+          "GSI2PK": {
+            "S": "CUSTOMER#amy"
+          },
+          "GSI2SK": {
+            "S": "status#paid#date#2023-06-17"
+          },
+          "GSI3PK": {
+            "S": "INVOICE#84e74f91"
+          },
+          "GSI3SK": {
+            "S": "CUSTOMER#amy"
+          }
+        }
+      }
+    },
+    {
+      "PutRequest": {
+        "Item": {
+          "PK": {
+            "S": "CUSTOMER#michael"
+          },
+          "SK": {
+            "S": "INVOICE#f46d551d"
+          },
+          "invoiceId": {
+            "S": "f46d551d"
+          },
+          "amount": {
+            "N": "44800"
+          },
+          "status": {
+            "S": "paid"
+          },
+          "date": {
+            "S": "2023-09-10"
+          },
+          "createdAt": {
+            "S": "2025-05-14T21:12:50.953634"
+          },
+          "customerName": {
+            "S": "Michael Novotny"
+          },
+          "customerEmail": {
+            "S": "michael@novotny.com"
+          },
+          "customerImageUrl": {
+            "S": "/customers/michael-novotny.png"
+          },
+          "GSI1PK": {
+            "S": "INVOICE"
+          },
+          "GSI1SK": {
+            "S": "status#paid#date#2023-09-10"
+          },
+          "GSI2PK": {
+            "S": "CUSTOMER#michael"
+          },
+          "GSI2SK": {
+            "S": "status#paid#date#2023-09-10"
+          },
+          "GSI3PK": {
+            "S": "INVOICE#f46d551d"
+          },
+          "GSI3SK": {
+            "S": "CUSTOMER#michael"
+          }
+        }
+      }
+    },
+    {
+      "PutRequest": {
+        "Item": {
+          "PK": {
+            "S": "CUSTOMER#evil"
+          },
+          "SK": {
+            "S": "INVOICE#b27536ae"
+          },
+          "invoiceId": {
+            "S": "b27536ae"
+          },
+          "amount": {
+            "N": "15795"
+          },
+          "status": {
+            "S": "pending"
+          },
+          "date": {
+            "S": "2022-12-06"
+          },
+          "createdAt": {
+            "S": "2025-05-14T21:12:50.953770"
+          },
+          "customerName": {
+            "S": "Evil Rabbit"
+          },
+          "customerEmail": {
+            "S": "evil@rabbit.com"
+          },
+          "customerImageUrl": {
+            "S": "/customers/evil-rabbit.png"
+          },
+          "GSI1PK": {
+            "S": "INVOICE"
+          },
+          "GSI1SK": {
+            "S": "status#pending#date#2022-12-06"
+          },
+          "GSI2PK": {
+            "S": "CUSTOMER#evil"
+          },
+          "GSI2SK": {
+            "S": "status#pending#date#2022-12-06"
+          },
+          "GSI3PK": {
+            "S": "INVOICE#b27536ae"
+          },
+          "GSI3SK": {
+            "S": "CUSTOMER#evil"
+          }
+        }
+      }
+    },
+    {
+      "PutRequest": {
+        "Item": {
+          "PK": {
+            "S": "CUSTOMER#evil"
+          },
+          "SK": {
+            "S": "INVOICE#0f73b788"
+          },
+          "invoiceId": {
+            "S": "0f73b788"
+          },
+          "amount": {
+            "N": "15795"
+          },
+          "status": {
+            "S": "pending"
+          },
+          "date": {
+            "S": "2022-12-06"
+          },
+          "createdAt": {
+            "S": "2025-05-14T21:12:50.953850"
+          },
+          "customerName": {
+            "S": "Evil Rabbit"
+          },
+          "customerEmail": {
+            "S": "evil@rabbit.com"
+          },
+          "customerImageUrl": {
+            "S": "/customers/evil-rabbit.png"
+          },
+          "GSI1PK": {
+            "S": "INVOICE"
+          },
+          "GSI1SK": {
+            "S": "status#pending#date#2022-12-06"
+          },
+          "GSI2PK": {
+            "S": "CUSTOMER#evil"
+          },
+          "GSI2SK": {
+            "S": "status#pending#date#2022-12-06"
+          },
+          "GSI3PK": {
+            "S": "INVOICE#0f73b788"
+          },
+          "GSI3SK": {
+            "S": "CUSTOMER#evil"
+          }
+        }
+      }
+    },
+    {
+      "PutRequest": {
+        "Item": {
+          "PK": {
+            "S": "CUSTOMER#delba"
+          },
+          "SK": {
+            "S": "INVOICE#bdf859cf"
+          },
+          "invoiceId": {
+            "S": "bdf859cf"
+          },
+          "amount": {
+            "N": "500"
+          },
+          "status": {
+            "S": "paid"
+          },
+          "date": {
+            "S": "2023-08-19"
+          },
+          "createdAt": {
+            "S": "2025-05-14T21:12:50.953887"
+          },
+          "customerName": {
+            "S": "Delba de Oliveira"
+          },
+          "customerEmail": {
+            "S": "delba@oliveira.com"
+          },
+          "customerImageUrl": {
+            "S": "/customers/delba-de-oliveira.png"
+          },
+          "GSI1PK": {
+            "S": "INVOICE"
+          },
+          "GSI1SK": {
+            "S": "status#paid#date#2023-08-19"
+          },
+          "GSI2PK": {
+            "S": "CUSTOMER#delba"
+          },
+          "GSI2SK": {
+            "S": "status#paid#date#2023-08-19"
+          },
+          "GSI3PK": {
+            "S": "INVOICE#bdf859cf"
+          },
+          "GSI3SK": {
+            "S": "CUSTOMER#delba"
+          }
+        }
+      }
+    },
+    {
+      "PutRequest": {
+        "Item": {
+          "PK": {
+            "S": "CUSTOMER#michael"
+          },
+          "SK": {
+            "S": "INVOICE#ff718a12"
+          },
+          "invoiceId": {
+            "S": "ff718a12"
+          },
+          "amount": {
+            "N": "32545"
+          },
+          "status": {
+            "S": "paid"
+          },
+          "date": {
+            "S": "2023-06-09"
+          },
+          "createdAt": {
+            "S": "2025-05-14T21:12:50.953920"
+          },
+          "customerName": {
+            "S": "Michael Novotny"
+          },
+          "customerEmail": {
+            "S": "michael@novotny.com"
+          },
+          "customerImageUrl": {
+            "S": "/customers/michael-novotny.png"
+          },
+          "GSI1PK": {
+            "S": "INVOICE"
+          },
+          "GSI1SK": {
+            "S": "status#paid#date#2023-06-09"
+          },
+          "GSI2PK": {
+            "S": "CUSTOMER#michael"
+          },
+          "GSI2SK": {
+            "S": "status#paid#date#2023-06-09"
+          },
+          "GSI3PK": {
+            "S": "INVOICE#ff718a12"
+          },
+          "GSI3SK": {
+            "S": "CUSTOMER#michael"
+          }
+        }
+      }
+    },
+    {
+      "PutRequest": {
+        "Item": {
+          "PK": {
+            "S": "CUSTOMER#michael"
+          },
+          "SK": {
+            "S": "INVOICE#85d278ce"
+          },
+          "invoiceId": {
+            "S": "85d278ce"
+          },
+          "amount": {
+            "N": "44800"
+          },
+          "status": {
+            "S": "paid"
+          },
+          "date": {
+            "S": "2023-09-10"
+          },
+          "createdAt": {
+            "S": "2025-05-14T21:12:50.953950"
+          },
+          "customerName": {
+            "S": "Michael Novotny"
+          },
+          "customerEmail": {
+            "S": "michael@novotny.com"
+          },
+          "customerImageUrl": {
+            "S": "/customers/michael-novotny.png"
+          },
+          "GSI1PK": {
+            "S": "INVOICE"
+          },
+          "GSI1SK": {
+            "S": "status#paid#date#2023-09-10"
+          },
+          "GSI2PK": {
+            "S": "CUSTOMER#michael"
+          },
+          "GSI2SK": {
+            "S": "status#paid#date#2023-09-10"
+          },
+          "GSI3PK": {
+            "S": "INVOICE#85d278ce"
+          },
+          "GSI3SK": {
+            "S": "CUSTOMER#michael"
+          }
+        }
+      }
+    },
+    {
+      "PutRequest": {
+        "Item": {
+          "PK": {
+            "S": "CUSTOMER#amy"
+          },
+          "SK": {
+            "S": "INVOICE#aa7d75ee"
+          },
+          "invoiceId": {
+            "S": "aa7d75ee"
+          },
+          "amount": {
+            "N": "1250"
+          },
+          "status": {
+            "S": "paid"
+          },
+          "date": {
+            "S": "2023-06-17"
+          },
+          "createdAt": {
+            "S": "2025-05-14T21:12:50.953965"
+          },
+          "customerName": {
+            "S": "Amy Burns"
+          },
+          "customerEmail": {
+            "S": "amy@burns.com"
+          },
+          "customerImageUrl": {
+            "S": "/customers/amy-burns.png"
+          },
+          "GSI1PK": {
+            "S": "INVOICE"
+          },
+          "GSI1SK": {
+            "S": "status#paid#date#2023-06-17"
+          },
+          "GSI2PK": {
+            "S": "CUSTOMER#amy"
+          },
+          "GSI2SK": {
+            "S": "status#paid#date#2023-06-17"
+          },
+          "GSI3PK": {
+            "S": "INVOICE#aa7d75ee"
+          },
+          "GSI3SK": {
+            "S": "CUSTOMER#amy"
+          }
+        }
+      }
+    },
+    {
+      "PutRequest": {
+        "Item": {
+          "PK": {
+            "S": "CUSTOMER#balazs"
+          },
+          "SK": {
+            "S": "INVOICE#b5c54cd9"
+          },
+          "invoiceId": {
+            "S": "b5c54cd9"
+          },
+          "amount": {
+            "N": "8945"
+          },
+          "status": {
+            "S": "paid"
+          },
+          "date": {
+            "S": "2023-06-03"
+          },
+          "createdAt": {
+            "S": "2025-05-14T21:12:50.953977"
+          },
+          "customerName": {
+            "S": "Balazs Orban"
+          },
+          "customerEmail": {
+            "S": "balazs@orban.com"
+          },
+          "customerImageUrl": {
+            "S": "/customers/balazs-orban.png"
+          },
+          "GSI1PK": {
+            "S": "INVOICE"
+          },
+          "GSI1SK": {
+            "S": "status#paid#date#2023-06-03"
+          },
+          "GSI2PK": {
+            "S": "CUSTOMER#balazs"
+          },
+          "GSI2SK": {
+            "S": "status#paid#date#2023-06-03"
+          },
+          "GSI3PK": {
+            "S": "INVOICE#b5c54cd9"
+          },
+          "GSI3SK": {
+            "S": "CUSTOMER#balazs"
+          }
+        }
+      }
+    },
+    {
+      "PutRequest": {
+        "Item": {
+          "PK": {
+            "S": "CUSTOMER#michael"
+          },
+          "SK": {
+            "S": "INVOICE#ffd93d4d"
+          },
+          "invoiceId": {
+            "S": "ffd93d4d"
+          },
+          "amount": {
+            "N": "44800"
+          },
+          "status": {
+            "S": "paid"
+          },
+          "date": {
+            "S": "2023-09-10"
+          },
+          "createdAt": {
+            "S": "2025-05-14T21:12:50.954006"
+          },
+          "customerName": {
+            "S": "Michael Novotny"
+          },
+          "customerEmail": {
+            "S": "michael@novotny.com"
+          },
+          "customerImageUrl": {
+            "S": "/customers/michael-novotny.png"
+          },
+          "GSI1PK": {
+            "S": "INVOICE"
+          },
+          "GSI1SK": {
+            "S": "status#paid#date#2023-09-10"
+          },
+          "GSI2PK": {
+            "S": "CUSTOMER#michael"
+          },
+          "GSI2SK": {
+            "S": "status#paid#date#2023-09-10"
+          },
+          "GSI3PK": {
+            "S": "INVOICE#ffd93d4d"
+          },
+          "GSI3SK": {
+            "S": "CUSTOMER#michael"
+          }
+        }
+      }
+    },
+    {
+      "PutRequest": {
+        "Item": {
+          "PK": {
+            "S": "CUSTOMER#balazs"
+          },
+          "SK": {
+            "S": "INVOICE#ffaf14bb"
+          },
+          "invoiceId": {
+            "S": "ffaf14bb"
+          },
+          "amount": {
+            "N": "34577"
+          },
+          "status": {
+            "S": "pending"
+          },
+          "date": {
+            "S": "2023-08-05"
+          },
+          "createdAt": {
+            "S": "2025-05-14T21:12:50.954045"
+          },
+          "customerName": {
+            "S": "Balazs Orban"
+          },
+          "customerEmail": {
+            "S": "balazs@orban.com"
+          },
+          "customerImageUrl": {
+            "S": "/customers/balazs-orban.png"
+          },
+          "GSI1PK": {
+            "S": "INVOICE"
+          },
+          "GSI1SK": {
+            "S": "status#pending#date#2023-08-05"
+          },
+          "GSI2PK": {
+            "S": "CUSTOMER#balazs"
+          },
+          "GSI2SK": {
+            "S": "status#pending#date#2023-08-05"
+          },
+          "GSI3PK": {
+            "S": "INVOICE#ffaf14bb"
+          },
+          "GSI3SK": {
+            "S": "CUSTOMER#balazs"
+          }
+        }
+      }
+    },
+    {
+      "PutRequest": {
+        "Item": {
+          "PK": {
+            "S": "CUSTOMER#evil"
+          },
+          "SK": {
+            "S": "INVOICE#eca2a9c1"
+          },
+          "invoiceId": {
+            "S": "eca2a9c1"
+          },
+          "amount": {
+            "N": "15795"
+          },
+          "status": {
+            "S": "pending"
+          },
+          "date": {
+            "S": "2022-12-06"
+          },
+          "createdAt": {
+            "S": "2025-05-14T21:12:50.954077"
+          },
+          "customerName": {
+            "S": "Evil Rabbit"
+          },
+          "customerEmail": {
+            "S": "evil@rabbit.com"
+          },
+          "customerImageUrl": {
+            "S": "/customers/evil-rabbit.png"
+          },
+          "GSI1PK": {
+            "S": "INVOICE"
+          },
+          "GSI1SK": {
+            "S": "status#pending#date#2022-12-06"
+          },
+          "GSI2PK": {
+            "S": "CUSTOMER#evil"
+          },
+          "GSI2SK": {
+            "S": "status#pending#date#2022-12-06"
+          },
+          "GSI3PK": {
+            "S": "INVOICE#eca2a9c1"
+          },
+          "GSI3SK": {
+            "S": "CUSTOMER#evil"
+          }
+        }
+      }
+    },
+    {
+      "PutRequest": {
+        "Item": {
+          "PK": {
+            "S": "CUSTOMER#michael"
+          },
+          "SK": {
+            "S": "INVOICE#ec605131"
+          },
+          "invoiceId": {
+            "S": "ec605131"
+          },
+          "amount": {
+            "N": "32545"
+          },
+          "status": {
+            "S": "paid"
+          },
+          "date": {
+            "S": "2023-06-09"
+          },
+          "createdAt": {
+            "S": "2025-05-14T21:12:50.954130"
+          },
+          "customerName": {
+            "S": "Michael Novotny"
+          },
+          "customerEmail": {
+            "S": "michael@novotny.com"
+          },
+          "customerImageUrl": {
+            "S": "/customers/michael-novotny.png"
+          },
+          "GSI1PK": {
+            "S": "INVOICE"
+          },
+          "GSI1SK": {
+            "S": "status#paid#date#2023-06-09"
+          },
+          "GSI2PK": {
+            "S": "CUSTOMER#michael"
+          },
+          "GSI2SK": {
+            "S": "status#paid#date#2023-06-09"
+          },
+          "GSI3PK": {
+            "S": "INVOICE#ec605131"
+          },
+          "GSI3SK": {
+            "S": "CUSTOMER#michael"
+          }
+        }
+      }
+    },
+    {
+      "PutRequest": {
+        "Item": {
+          "PK": {
+            "S": "CUSTOMER#delba"
+          },
+          "SK": {
+            "S": "INVOICE#4b1431cd"
+          },
+          "invoiceId": {
+            "S": "4b1431cd"
+          },
+          "amount": {
+            "N": "500"
+          },
+          "status": {
+            "S": "paid"
+          },
+          "date": {
+            "S": "2023-08-19"
+          },
+          "createdAt": {
+            "S": "2025-05-14T21:12:50.954155"
+          },
+          "customerName": {
+            "S": "Delba de Oliveira"
+          },
+          "customerEmail": {
+            "S": "delba@oliveira.com"
+          },
+          "customerImageUrl": {
+            "S": "/customers/delba-de-oliveira.png"
+          },
+          "GSI1PK": {
+            "S": "INVOICE"
+          },
+          "GSI1SK": {
+            "S": "status#paid#date#2023-08-19"
+          },
+          "GSI2PK": {
+            "S": "CUSTOMER#delba"
+          },
+          "GSI2SK": {
+            "S": "status#paid#date#2023-08-19"
+          },
+          "GSI3PK": {
+            "S": "INVOICE#4b1431cd"
+          },
+          "GSI3SK": {
+            "S": "CUSTOMER#delba"
+          }
+        }
+      }
+    },
+    {
+      "PutRequest": {
+        "Item": {
+          "PK": {
+            "S": "CUSTOMER#evil"
+          },
+          "SK": {
+            "S": "INVOICE#ee9b6f87"
+          },
+          "invoiceId": {
+            "S": "ee9b6f87"
+          },
+          "amount": {
+            "N": "15795"
+          },
+          "status": {
+            "S": "pending"
+          },
+          "date": {
+            "S": "2022-12-06"
+          },
+          "createdAt": {
+            "S": "2025-05-14T21:12:50.954186"
+          },
+          "customerName": {
+            "S": "Evil Rabbit"
+          },
+          "customerEmail": {
+            "S": "evil@rabbit.com"
+          },
+          "customerImageUrl": {
+            "S": "/customers/evil-rabbit.png"
+          },
+          "GSI1PK": {
+            "S": "INVOICE"
+          },
+          "GSI1SK": {
+            "S": "status#pending#date#2022-12-06"
+          },
+          "GSI2PK": {
+            "S": "CUSTOMER#evil"
+          },
+          "GSI2SK": {
+            "S": "status#pending#date#2022-12-06"
+          },
+          "GSI3PK": {
+            "S": "INVOICE#ee9b6f87"
+          },
+          "GSI3SK": {
+            "S": "CUSTOMER#evil"
+          }
+        }
+      }
+    },
+    {
+      "PutRequest": {
+        "Item": {
+          "PK": {
+            "S": "CUSTOMER#balazs"
+          },
+          "SK": {
+            "S": "INVOICE#ad3b00ab"
+          },
+          "invoiceId": {
+            "S": "ad3b00ab"
+          },
+          "amount": {
+            "N": "8546"
+          },
+          "status": {
+            "S": "paid"
+          },
+          "date": {
+            "S": "2023-06-07"
+          },
+          "createdAt": {
+            "S": "2025-05-14T21:12:50.954228"
+          },
+          "customerName": {
+            "S": "Balazs Orban"
+          },
+          "customerEmail": {
+            "S": "balazs@orban.com"
+          },
+          "customerImageUrl": {
+            "S": "/customers/balazs-orban.png"
+          },
+          "GSI1PK": {
+            "S": "INVOICE"
+          },
+          "GSI1SK": {
+            "S": "status#paid#date#2023-06-07"
+          },
+          "GSI2PK": {
+            "S": "CUSTOMER#balazs"
+          },
+          "GSI2SK": {
+            "S": "status#paid#date#2023-06-07"
+          },
+          "GSI3PK": {
+            "S": "INVOICE#ad3b00ab"
+          },
+          "GSI3SK": {
+            "S": "CUSTOMER#balazs"
+          }
+        }
+      }
+    },
+    {
+      "PutRequest": {
+        "Item": {
+          "PK": {
+            "S": "CUSTOMER#evil"
+          },
+          "SK": {
+            "S": "INVOICE#f4c52e6c"
+          },
+          "invoiceId": {
+            "S": "f4c52e6c"
+          },
+          "amount": {
+            "N": "15795"
+          },
+          "status": {
+            "S": "pending"
+          },
+          "date": {
+            "S": "2022-12-06"
+          },
+          "createdAt": {
+            "S": "2025-05-14T21:12:50.954298"
+          },
+          "customerName": {
+            "S": "Evil Rabbit"
+          },
+          "customerEmail": {
+            "S": "evil@rabbit.com"
+          },
+          "customerImageUrl": {
+            "S": "/customers/evil-rabbit.png"
+          },
+          "GSI1PK": {
+            "S": "INVOICE"
+          },
+          "GSI1SK": {
+            "S": "status#pending#date#2022-12-06"
+          },
+          "GSI2PK": {
+            "S": "CUSTOMER#evil"
+          },
+          "GSI2SK": {
+            "S": "status#pending#date#2022-12-06"
+          },
+          "GSI3PK": {
+            "S": "INVOICE#f4c52e6c"
+          },
+          "GSI3SK": {
+            "S": "CUSTOMER#evil"
+          }
+        }
+      }
+    },
+    {
+      "PutRequest": {
+        "Item": {
+          "PK": {
+            "S": "CUSTOMER#evil"
+          },
+          "SK": {
+            "S": "INVOICE#14f00f5a"
+          },
+          "invoiceId": {
+            "S": "14f00f5a"
+          },
+          "amount": {
+            "N": "666"
+          },
+          "status": {
+            "S": "pending"
+          },
+          "date": {
+            "S": "2023-06-27"
+          },
+          "createdAt": {
+            "S": "2025-05-14T21:12:50.954412"
+          },
+          "customerName": {
+            "S": "Evil Rabbit"
+          },
+          "customerEmail": {
+            "S": "evil@rabbit.com"
+          },
+          "customerImageUrl": {
+            "S": "/customers/evil-rabbit.png"
+          },
+          "GSI1PK": {
+            "S": "INVOICE"
+          },
+          "GSI1SK": {
+            "S": "status#pending#date#2023-06-27"
+          },
+          "GSI2PK": {
+            "S": "CUSTOMER#evil"
+          },
+          "GSI2SK": {
+            "S": "status#pending#date#2023-06-27"
+          },
+          "GSI3PK": {
+            "S": "INVOICE#14f00f5a"
+          },
+          "GSI3SK": {
+            "S": "CUSTOMER#evil"
+          }
+        }
+      }
+    },
+    {
+      "PutRequest": {
+        "Item": {
+          "PK": {
+            "S": "CUSTOMER#michael"
+          },
+          "SK": {
+            "S": "INVOICE#88deb3ac"
+          },
+          "invoiceId": {
+            "S": "88deb3ac"
+          },
+          "amount": {
+            "N": "32545"
+          },
+          "status": {
+            "S": "paid"
+          },
+          "date": {
+            "S": "2023-06-09"
+          },
+          "createdAt": {
+            "S": "2025-05-14T21:12:50.954481"
+          },
+          "customerName": {
+            "S": "Michael Novotny"
+          },
+          "customerEmail": {
+            "S": "michael@novotny.com"
+          },
+          "customerImageUrl": {
+            "S": "/customers/michael-novotny.png"
+          },
+          "GSI1PK": {
+            "S": "INVOICE"
+          },
+          "GSI1SK": {
+            "S": "status#paid#date#2023-06-09"
+          },
+          "GSI2PK": {
+            "S": "CUSTOMER#michael"
+          },
+          "GSI2SK": {
+            "S": "status#paid#date#2023-06-09"
+          },
+          "GSI3PK": {
+            "S": "INVOICE#88deb3ac"
+          },
+          "GSI3SK": {
+            "S": "CUSTOMER#michael"
+          }
+        }
+      }
+    },
+    {
+      "PutRequest": {
+        "Item": {
+          "PK": {
+            "S": "CUSTOMER#michael"
+          },
+          "SK": {
+            "S": "INVOICE#3542744c"
+          },
+          "invoiceId": {
+            "S": "3542744c"
+          },
+          "amount": {
+            "N": "32545"
+          },
+          "status": {
+            "S": "paid"
+          },
+          "date": {
+            "S": "2023-06-09"
+          },
+          "createdAt": {
+            "S": "2025-05-14T21:12:50.954527"
+          },
+          "customerName": {
+            "S": "Michael Novotny"
+          },
+          "customerEmail": {
+            "S": "michael@novotny.com"
+          },
+          "customerImageUrl": {
+            "S": "/customers/michael-novotny.png"
+          },
+          "GSI1PK": {
+            "S": "INVOICE"
+          },
+          "GSI1SK": {
+            "S": "status#paid#date#2023-06-09"
+          },
+          "GSI2PK": {
+            "S": "CUSTOMER#michael"
+          },
+          "GSI2SK": {
+            "S": "status#paid#date#2023-06-09"
+          },
+          "GSI3PK": {
+            "S": "INVOICE#3542744c"
+          },
+          "GSI3SK": {
+            "S": "CUSTOMER#michael"
+          }
+        }
+      }
+    },
+    {
+      "PutRequest": {
+        "Item": {
+          "PK": {
+            "S": "CUSTOMER#balazs"
+          },
+          "SK": {
+            "S": "INVOICE#fd389865"
+          },
+          "invoiceId": {
+            "S": "fd389865"
+          },
+          "amount": {
+            "N": "8945"
+          },
+          "status": {
+            "S": "paid"
+          },
+          "date": {
+            "S": "2023-06-03"
+          },
+          "createdAt": {
+            "S": "2025-05-14T21:12:50.954568"
+          },
+          "customerName": {
+            "S": "Balazs Orban"
+          },
+          "customerEmail": {
+            "S": "balazs@orban.com"
+          },
+          "customerImageUrl": {
+            "S": "/customers/balazs-orban.png"
+          },
+          "GSI1PK": {
+            "S": "INVOICE"
+          },
+          "GSI1SK": {
+            "S": "status#paid#date#2023-06-03"
+          },
+          "GSI2PK": {
+            "S": "CUSTOMER#balazs"
+          },
+          "GSI2SK": {
+            "S": "status#paid#date#2023-06-03"
+          },
+          "GSI3PK": {
+            "S": "INVOICE#fd389865"
+          },
+          "GSI3SK": {
+            "S": "CUSTOMER#balazs"
+          }
+        }
+      }
+    },
+    {
+      "PutRequest": {
+        "Item": {
+          "PK": {
+            "S": "CUSTOMER#delba"
+          },
+          "SK": {
+            "S": "INVOICE#e48c33b9"
+          },
+          "invoiceId": {
+            "S": "e48c33b9"
+          },
+          "amount": {
+            "N": "20348"
+          },
+          "status": {
+            "S": "pending"
+          },
+          "date": {
+            "S": "2022-11-14"
+          },
+          "createdAt": {
+            "S": "2025-05-14T21:12:50.954582"
+          },
+          "customerName": {
+            "S": "Delba de Oliveira"
+          },
+          "customerEmail": {
+            "S": "delba@oliveira.com"
+          },
+          "customerImageUrl": {
+            "S": "/customers/delba-de-oliveira.png"
+          },
+          "GSI1PK": {
+            "S": "INVOICE"
+          },
+          "GSI1SK": {
+            "S": "status#pending#date#2022-11-14"
+          },
+          "GSI2PK": {
+            "S": "CUSTOMER#delba"
+          },
+          "GSI2SK": {
+            "S": "status#pending#date#2022-11-14"
+          },
+          "GSI3PK": {
+            "S": "INVOICE#e48c33b9"
+          },
+          "GSI3SK": {
+            "S": "CUSTOMER#delba"
+          }
+        }
+      }
+    },
+    {
+      "PutRequest": {
+        "Item": {
+          "PK": {
+            "S": "CUSTOMER#balazs"
+          },
+          "SK": {
+            "S": "INVOICE#dca9d349"
+          },
+          "invoiceId": {
+            "S": "dca9d349"
+          },
+          "amount": {
+            "N": "8546"
+          },
+          "status": {
+            "S": "paid"
+          },
+          "date": {
+            "S": "2023-06-07"
+          },
+          "createdAt": {
+            "S": "2025-05-14T21:12:50.954606"
+          },
+          "customerName": {
+            "S": "Balazs Orban"
+          },
+          "customerEmail": {
+            "S": "balazs@orban.com"
+          },
+          "customerImageUrl": {
+            "S": "/customers/balazs-orban.png"
+          },
+          "GSI1PK": {
+            "S": "INVOICE"
+          },
+          "GSI1SK": {
+            "S": "status#paid#date#2023-06-07"
+          },
+          "GSI2PK": {
+            "S": "CUSTOMER#balazs"
+          },
+          "GSI2SK": {
+            "S": "status#paid#date#2023-06-07"
+          },
+          "GSI3PK": {
+            "S": "INVOICE#dca9d349"
+          },
+          "GSI3SK": {
+            "S": "CUSTOMER#balazs"
+          }
+        }
+      }
+    }
+  ]
+}
