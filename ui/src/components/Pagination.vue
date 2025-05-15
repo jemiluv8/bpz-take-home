@@ -25,10 +25,10 @@ const createPageURL = (pageNumber: number) => {
 }
 
 const props = defineProps({
-  totalPages: {
-    type: Number,
-    required: true,
-  },
+  hasMoreData: {
+    type: Boolean,
+    default: false
+  }
 })
 </script>
 
@@ -39,11 +39,11 @@ const props = defineProps({
       :href="createPageURL(currentPage - 1)"
       :isDisabled="currentPage <= 1"
     />
-    <h3>Page {{ currentPage }} of {{ props.totalPages }}</h3>
+    <h3>Page {{ currentPage }}</h3>
     <PaginationArrow
       direction="right"
       :href="createPageURL(currentPage + 1)"
-      :isDisabled="currentPage >= props.totalPages"
+      :isDisabled="!hasMoreData"
     />
   </div>
 </template>

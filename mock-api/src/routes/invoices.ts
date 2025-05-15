@@ -80,10 +80,12 @@ export function InvoiceRoutes(app: Express) {
         { $count: "total"}
       ])
       console.log("totalItems", totalItems)
-      const total = totalItems.length ? totalItems[0].total : invoices.length
+      const count = totalItems.length ? totalItems[0].total : invoices.length
       res.status(200).json({
         data: invoices,
-        totalPages: Math.ceil(total/ITEMS_PER_PAGE)
+        totalPages: Math.ceil(count/ITEMS_PER_PAGE),
+        hasMoreData: (ITEMS_PER_PAGE * currentPage) < count,
+        count,
       });
     } catch (error: any) {
       console.error("Database Error:", error);

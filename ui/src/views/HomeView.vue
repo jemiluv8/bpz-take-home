@@ -7,6 +7,8 @@ import { RefreshCcw } from 'lucide-vue-next'
 import { computed } from "vue";
 import { useRoute } from 'vue-router';
 
+const itemsPerPage = 20
+
 const formatCurrency = (amount: number) => {
   return (amount / 100).toLocaleString('en-US', {
     style: 'currency',
@@ -23,17 +25,17 @@ const currentPage = computed({
   },
 })
 
-const searchQuery = computed({
-  get: () => String(route.query.query || ''),
-  set: (query: string) => {
-    urlParams.query = query || "page=1";
-  },
-});
+// const use
+const mockApiUrl = `http://0.0.0.0:9909/invoices?page=${currentPage.value}&pageSize=${itemsPerPage}`
+const awsApiUrl = `https://o1bh160g4m.execute-api.eu-north-1.amazonaws.com/invoices`
 
 const { isLoading, isFetching, isError, data, error, refetch } = useQuery({
   staleTime: 5 * 60 * 1000,
   queryKey: ['invoices', { page: currentPage }],
-  queryFn: () => fetch(`http://0.0.0.0:9909/invoices?page=${currentPage.value}`).then(response => response.json()),
+  queryFn: () => fetch(awsApiUrl).then(response => {
+    console.log("RAW RESPONSE",)
+    return response.json()
+  }),
 })
 
 const formatDateToLocal = (
@@ -52,6 +54,7 @@ const formatDateToLocal = (
 
 const totalPages = computed(() => data ? data.value.totalPages : 0)
 const invoices = computed(() => data ? data.value.data : [])
+const count = computed(() => data ? data.value.count : invoices.value.length)
 </script>
 
 <template>
@@ -85,10 +88,10 @@ const invoices = computed(() => data ? data.value.data : [])
         >
           <td className="whitespace-nowrap py-3 pl-6 pr-3">
             <div className="flex items-center gap-3">
-              <p>{{invoice.name}}</p>
+              <p>{{invoice.name || invoice.customerName}}</p>
             </div>
           </td>
-          <td className="whitespace-nowrap px-3 py-3">{{invoice.email}}</td>
+          <td className="whitespace-nowrap px-3 py-3">{{invoice.email || invoice.customerEmail}}</td>
           <td className="whitespace-nowrap px-3 py-3">
             {{ formatCurrency(invoice.amount) }}
           </td>
@@ -103,7 +106,7 @@ const invoices = computed(() => data ? data.value.data : [])
       </tbody>
 
       <tfoot class="pt-5 block w-full">
-        <Pagination :total-pages="totalPages" />
+        <Pagination :has-more-data="data.hasMoreData" />
       </tfoot>
     </table>
     <div class="flex flex-col justify-center align-middle items-center" v-else>
