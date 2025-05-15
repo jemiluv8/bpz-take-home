@@ -5,7 +5,7 @@ import { useQuery } from '@tanstack/vue-query';
 import { useUrlSearchParams } from '@vueuse/core';
 import { RefreshCcw } from 'lucide-vue-next'
 import { computed } from "vue";
-import { useRoute } from 'vue-router';
+import { useRoute, useRouter } from 'vue-router';
 
 const itemsPerPage = 20
 
@@ -16,27 +16,50 @@ const formatCurrency = (amount: number) => {
   })
 }
 
+const lastKeys: any[] = []
+
 const route = useRoute()
+const router = useRouter()
 const urlParams = useUrlSearchParams('history')
-const currentPage = computed({
-  get: () => Number(route.query.page) || 1,
-  set: (pageNumber: number) => {
-    urlParams.page = String(pageNumber)
+const lastEvaluatedKey = computed({
+  get: () => route.query.lastEvaluatedKey || undefined,
+  set: (newKey: string) => {
+    urlParams.lastEvaluatedKey = newKey
   },
 })
+const pathname = computed(() => route.path)
 
-// const use
-const mockApiUrl = `http://0.0.0.0:9909/invoices?page=${currentPage.value}&pageSize=${itemsPerPage}`
-const awsApiUrl = `https://o1bh160g4m.execute-api.eu-north-1.amazonaws.com/invoices`
+const makeQueryString = (extraParams: Record<string, any>) => {
+  const currentParams: Record<string, any> = { pageSize: itemsPerPage, ...urlParams, ...extraParams }
+
+  const params = new URLSearchParams(currentParams)
+  return params.toString()
+}
+
+const createPageURL = (extraParams: Record<string, any>) => {
+  return `${pathname.value}?${makeQueryString(extraParams)}`
+}
+
+// const mockApiUrl = `http://0.0.0.0:9909/invoices?page=${currentPage.value}&pageSize=${itemsPerPage}`
+const awsApiUrl = computed(() => {
+  console.log("route", route.query)
+  return `https://o1bh160g4m.execute-api.eu-north-1.amazonaws.com/invoices?${makeQueryString(route.query)}`
+})
+
+console.log({
+  awsApiUrl,
+  lastEvaluatedKey: route.query.lastEvaluatedKey
+})
 
 const { isLoading, isFetching, isError, data, error, refetch } = useQuery({
   staleTime: 5 * 60 * 1000,
-  queryKey: ['invoices', { page: currentPage }],
-  queryFn: () => fetch(awsApiUrl).then(response => {
-    console.log("RAW RESPONSE",)
-    return response.json()
-  }),
+  queryKey: ['invoices', { lastEvaluatedKey }],
+  queryFn: () => fetch(awsApiUrl.value).then(response => response.json()),
 })
+
+if (data && data.value && data.value.lastEvaluatedKey) {
+  lastKeys.push(data.value.lastEvaluatedKey)
+}
 
 const formatDateToLocal = (
   dateStr: string,
@@ -52,9 +75,27 @@ const formatDateToLocal = (
   return formatter.format(date);
 };
 
-const totalPages = computed(() => data ? data.value.totalPages : 0)
+const loadMore = () => {
+  const { lastEvaluatedKey } = data.value || {}
+  if (lastEvaluatedKey) {
+    router.push(createPageURL({ lastEvaluatedKey: data.value.lastEvaluatedKey }))
+  } else {
+    alert("No more data to load")
+  }
+}
+
+const loadLess = () => {
+  // FIX ME - last keys are not persisted accross page reloads. Do better
+  if (lastKeys.length > 1) {
+    lastKeys.pop()
+    const prev = lastKeys.pop()
+    router.push(createPageURL({ lastEvaluatedKey: prev }))
+  }
+}
+
+console.log("lastKeys", lastKeys)
+
 const invoices = computed(() => data ? data.value.data : [])
-const count = computed(() => data ? data.value.count : invoices.value.length)
 </script>
 
 <template>
@@ -69,6 +110,7 @@ const count = computed(() => data ? data.value.count : invoices.value.length)
     <table v-else-if="!isError" className="hidden min-w-full text-gray-900 md:table mt-6">
       <thead className="rounded-lg text-left text-sm font-normal bg-gray-300">
         <tr>
+          <th scope="col" className="px-4 py-5 font-bold sm:pl-6">#InvoiceID</th>
           <th scope="col" className="px-4 py-5 font-bold sm:pl-6">Customer</th>
           <th scope="col" className="px-3 py-5 font-bold">Email</th>
           <th scope="col" className="px-3 py-5 font-bold">Amount</th>
@@ -86,6 +128,11 @@ const count = computed(() => data ? data.value.count : invoices.value.length)
           :key="invoice.customer_id"
           className="w-full border-b py-3 text-sm last-of-type:border-none [&:first-child>td:first-child]:rounded-tl-lg [&:first-child>td:last-child]:rounded-tr-lg [&:last-child>td:first-child]:rounded-bl-lg [&:last-child>td:last-child]:rounded-br-lg"
         >
+          <td className="whitespace-nowrap py-3 pl-6 pr-3">
+            <div className="flex items-center gap-3">
+              <p>{{invoice.invoiceId}}</p>
+            </div>
+          </td>
           <td className="whitespace-nowrap py-3 pl-6 pr-3">
             <div className="flex items-center gap-3">
               <p>{{invoice.name || invoice.customerName}}</p>
@@ -106,7 +153,7 @@ const count = computed(() => data ? data.value.count : invoices.value.length)
       </tbody>
 
       <tfoot class="pt-5 block w-full">
-        <Pagination :has-more-data="data.hasMoreData" />
+        <Pagination :has-prev="lastKeys.length > 1" @prev="loadLess" @next="loadMore" :has-more-data="data.hasMoreData" />
       </tfoot>
     </table>
     <div class="flex flex-col justify-center align-middle items-center" v-else>

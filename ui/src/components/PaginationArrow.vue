@@ -2,9 +2,9 @@
   <div v-if="isDisabled" :class="containerClasses">
     <component :is="ArrowComponent" :size="20" />
   </div>
-  <router-link v-else :to="href" :class="containerClasses">
+  <div v-else @click="$emit('clicked')" :class="containerClasses">
     <component :is="ArrowComponent" :size="20" />
-  </router-link>
+  </div>
 </template>
 
 <script setup lang="ts">
@@ -15,10 +15,6 @@ import { RouterLink } from 'vue-router' // Import RouterLink if not globally ava
 import { MoveLeft, MoveRight } from 'lucide-vue-next'
 
 const props = defineProps({
-  href: {
-    type: String,
-    required: true,
-  },
   direction: {
     type: String as () => 'left' | 'right', // Type assertion for union type
     required: true,

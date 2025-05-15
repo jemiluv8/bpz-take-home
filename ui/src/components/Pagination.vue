@@ -14,18 +14,12 @@ const currentPage = computed({
   },
 })
 
-const pathname = computed(() => route.path)
-
-const createPageURL = (pageNumber: number) => {
-  const currentParams: Record<string, any> = { ...urlParams }
-  currentParams.page = String(pageNumber)
-
-  const params = new URLSearchParams(currentParams)
-  return `${pathname.value}?${params.toString()}`
-}
-
 const props = defineProps({
   hasMoreData: {
+    type: Boolean,
+    default: false
+  },
+  hasPrev: {
     type: Boolean,
     default: false
   }
@@ -36,14 +30,14 @@ const props = defineProps({
   <div className="flex gap-4 align-middle items-center">
     <PaginationArrow
       direction="left"
-      :href="createPageURL(currentPage - 1)"
-      :isDisabled="currentPage <= 1"
+      @click="$emit('prev')"
+      :isDisabled="!props.hasPrev"
     />
     <h3>Page {{ currentPage }}</h3>
     <PaginationArrow
       direction="right"
-      :href="createPageURL(currentPage + 1)"
-      :isDisabled="!hasMoreData"
+      @click="$emit('next')"
+      :isDisabled="!props.hasMoreData"
     />
   </div>
 </template>
