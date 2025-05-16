@@ -1,6 +1,6 @@
 import { createRouter, createWebHistory } from 'vue-router'
-import HomeView from '../views/HomeView.vue'
-import NewOrder from '../views/NewOrder.vue'
+import HomeView from "../views/ListView.vue"
+import CreateOrder from '@/views/CreateOrder.vue'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -13,7 +13,7 @@ const router = createRouter({
     {
       path: '/new-order',
       name: 'new-order',
-      component: NewOrder,
+      component: CreateOrder,
     },
     {
       path: '/about',

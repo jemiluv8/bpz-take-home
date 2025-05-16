@@ -153,7 +153,7 @@ const invoices = computed(() => data ? data.value.data : [])
       </tbody>
 
       <tfoot class="pt-5 block w-full">
-        <Pagination :has-prev="lastKeys.length > 1" @prev="loadLess" @next="loadMore" :has-more-data="data.hasMoreData" />
+        <Pagination :has-prev="lastKeys.length > 0" @prev="loadLess" @next="loadMore" :has-more-data="data.hasMoreData" />
       </tfoot>
     </table>
     <div class="flex flex-col justify-center align-middle items-center" v-else>
