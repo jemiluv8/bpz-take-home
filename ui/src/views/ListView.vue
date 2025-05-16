@@ -39,11 +39,11 @@ const makeQueryString = (extraParams: Record<string, any>) => {
 const createPageURL = (extraParams: Record<string, any>) => {
   return `${pathname.value}?${makeQueryString(extraParams)}`
 }
-
+const rootUrl = "https://8bktci9d17.execute-api.us-east-1.amazonaws.com/invoices"
 // const mockApiUrl = `http://0.0.0.0:9909/invoices?page=${currentPage.value}&pageSize=${itemsPerPage}`
 const awsApiUrl = computed(() => {
   console.log("route", route.query)
-  return `https://o1bh160g4m.execute-api.eu-north-1.amazonaws.com/invoices?${makeQueryString(route.query)}`
+  return `${rootUrl}?${makeQueryString(route.query)}`
 })
 
 console.log({
@@ -153,7 +153,7 @@ const invoices = computed(() => data ? data.value.data : [])
       </tbody>
 
       <tfoot class="pt-5 block w-full">
-        <Pagination :has-prev="lastKeys.length > 0" @prev="loadLess" @next="loadMore" :has-more-data="data.hasMoreData" />
+        <Pagination :has-prev="lastKeys.length > 0" @prev="loadLess" @next="loadMore" :has-more-data="!!data.lastEvaluatedKey" />
       </tfoot>
     </table>
     <div class="flex flex-col justify-center align-middle items-center" v-else>

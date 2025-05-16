@@ -2,7 +2,10 @@
 import { ref, reactive } from 'vue'
 import { useRouter } from 'vue-router'
 import { z } from 'zod'
-import { DollarSign, Mail, MessageSquare } from "lucide-vue-next"
+import { DollarSign, Mail, User2 } from "lucide-vue-next"
+import { useMutation } from '@tanstack/vue-query'
+
+type InvoicePayload = z.infer<typeof CreateInvoiceSchema>;
 
 // Define the Zod schema for validation - customerId entirely removed
 const CreateInvoiceSchema = z.object({
@@ -11,6 +14,8 @@ const CreateInvoiceSchema = z.object({
     invalid_type_error: 'Please select an invoice status.',
   }),
   email: z.string().email({ message: 'Please enter a valid email address.' }),
+  name: z.string({ message: 'Please enter a name' }),
+  date: z.string(),
 })
 
 // Define the form data state
@@ -18,6 +23,8 @@ const formData = reactive({
   amount: null as number | null,
   email: '',
   status: '',
+  name: '',
+  date: new Date().toISOString().split('T')[0]
 })
 
 // Define state for validation errors and general message
@@ -26,11 +33,66 @@ const errors = reactive<{
   status?: string[]
   email?: string[]
   general?: string[]
+  name?: string[]
 }>({})
 const message = ref<string | null>(null)
 const isLoading = ref(false)
 
 const router = useRouter()
+
+const createInvoiceMutation = useMutation({
+  mutationFn: async (newInvoice: InvoicePayload) => {
+    const response = await fetch('https://8bktci9d17.execute-api.us-east-1.amazonaws.com/invoices', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(newInvoice),
+    });
+
+    const responseData = await response.json();
+
+    if (!response.ok) {
+        // Assuming the backend returns errors in a specific format on failure
+        // Adjust this based on your dummy backend's actual error structure
+        const errorDetail = responseData as { errors?: any, message?: string };
+        throw new Error(errorDetail.message || 'Failed to create invoice');
+    }
+
+    return responseData;
+  },
+  onSuccess: (data: any) => {
+    message.value = data.message || 'Invoice created successfully!';
+    Object.assign(errors, {}); // Clear errors on success
+    console.log('Mutation successful:', data);
+    setTimeout(() => {
+       router.push('/');
+    }, 1000);
+  },
+  onError: (error: any) => {
+    console.error('Mutation failed:', error);
+    message.value = error.message || 'An unexpected error occurred during creation.';
+
+    // Attempt to parse specific validation errors if returned by the backend
+    if (error && error.response && error.response.json) {
+         error.response.json().then((errorData: any) => {
+             if (errorData.errors) {
+                 Object.assign(errors, errorData.errors);
+             } else {
+                // If no specific field errors, clear previous ones
+                Object.assign(errors, {});
+             }
+         }).catch(() => {
+             // Failed to parse error JSON, just show general message
+             Object.assign(errors, {});
+         });
+    } else {
+       // If error is not from fetch or doesn't have a response, clear errors
+       Object.assign(errors, {});
+    }
+    isLoading.value = false
+  },
+});
 
 async function apiCreateInvoice(payload: z.infer<typeof CreateInvoiceSchema>) {
   console.log('Simulating API Call with payload:', payload)
@@ -85,28 +147,30 @@ async function handleSubmit() {
     return
   }
 
-  try {
-    const apiResponse = await apiCreateInvoice(clientValidationResult.data)
+  createInvoiceMutation.mutate(clientValidationResult.data);
 
-    if (apiResponse.success) {
-      console.log('Invoice created successfully:', apiResponse.message)
-      message.value = apiResponse.message || 'Success!'
-      setTimeout(() => {
-        router.push('/dashboard/invoices')
-      }, 1000)
-    } else {
-      console.error('API Error:', apiResponse.message)
-      if (apiResponse.errors) {
-        Object.assign(errors, apiResponse.errors)
-      }
-      message.value = apiResponse.message || 'An unexpected error occurred.'
-    }
-  } catch (apiCallError) {
-    console.error('API Call Error:', apiCallError)
-    message.value = 'Failed to connect to the server. Please try again.'
-  } finally {
-    isLoading.value = false
-  }
+  // try {
+  //   const apiResponse = await apiCreateInvoice(clientValidationResult.data)
+
+  //   if (apiResponse.success) {
+  //     console.log('Invoice created successfully:', apiResponse.message)
+  //     message.value = apiResponse.message || 'Success!'
+  //     setTimeout(() => {
+  //       router.push('/dashboard/invoices')
+  //     }, 1000)
+  //   } else {
+  //     console.error('API Error:', apiResponse.message)
+  //     if (apiResponse.errors) {
+  //       Object.assign(errors, apiResponse.errors)
+  //     }
+  //     message.value = apiResponse.message || 'An unexpected error occurred.'
+  //   }
+  // } catch (apiCallError) {
+  //   console.error('API Call Error:', apiCallError)
+  //   message.value = 'Failed to connect to the server. Please try again.'
+  // } finally {
+  //   isLoading.value = false
+  // }
 }
 
 // Simple Icon Components
@@ -131,30 +195,30 @@ const CheckIcon = {
 <template>
   <form @submit.prevent="handleSubmit">
     <div class="rounded-md bg-gray-50 p-4 md:p-6 flex flex-col gap-5 space-y-4">
-      <div class="mb-4">
-        <label htmlFor="amount" class="mb-2 block text-sm font-medium"> Choose an amount </label>
+
+    <div class="mb-4">
+        <label htmlFor="name" class="mb-2 block text-sm font-medium"> Customer Name </label>
         <div class="relative mt-2 rounded-md">
           <div class="relative">
             <input
-              id="amount"
-              name="amount"
-              type="number"
-              step="0.01"
-              placeholder="Enter USD amount"
+              id="name"
+              name="name"
+              type="name"
+              placeholder="Enter customer name"
               class="peer block w-full rounded-md border border-gray-200 py-2 pl-10 text-sm outline-2 placeholder:text-gray-500"
-              v-model.number="formData.amount"
-              aria-describedby="amount-error"
-              :class="{ 'border-red-500': errors.amount }"
+              v-model="formData.name"
+              aria-describedby="name-error"
+              :class="{ 'border-red-500': errors.name }"
             />
-            <DollarSign
+            <User2
               class="pointer-events-none absolute left-3 top-1/2 h-[18px] w-[18px] -translate-y-1/2 text-gray-500 peer-focus:text-gray-900"
             />
           </div>
         </div>
 
-        <div id="amount-error" aria-live="polite" aria-atomic="true">
-          <p v-if="errors.amount" class="mt-2 text-sm text-red-500">
-            {{ errors.amount[0] }}
+        <div id="name-error" aria-live="polite" aria-atomic="true">
+          <p v-if="errors.name" class="mt-2 text-sm text-red-500">
+            {{ errors.name[0] }}
           </p>
         </div>
       </div>
@@ -182,6 +246,34 @@ const CheckIcon = {
         <div id="email-error" aria-live="polite" aria-atomic="true">
           <p v-if="errors.email" class="mt-2 text-sm text-red-500">
             {{ errors.email[0] }}
+          </p>
+        </div>
+      </div>
+
+      <div class="mb-4">
+        <label htmlFor="amount" class="mb-2 block text-sm font-medium"> Choose an amount </label>
+        <div class="relative mt-2 rounded-md">
+          <div class="relative">
+            <input
+              id="amount"
+              name="amount"
+              type="number"
+              step="0.01"
+              placeholder="Enter USD amount"
+              class="peer block w-full rounded-md border border-gray-200 py-2 pl-10 text-sm outline-2 placeholder:text-gray-500"
+              v-model.number="formData.amount"
+              aria-describedby="amount-error"
+              :class="{ 'border-red-500': errors.amount }"
+            />
+            <DollarSign
+              class="pointer-events-none absolute left-3 top-1/2 h-[18px] w-[18px] -translate-y-1/2 text-gray-500 peer-focus:text-gray-900"
+            />
+          </div>
+        </div>
+
+        <div id="amount-error" aria-live="polite" aria-atomic="true">
+          <p v-if="errors.amount" class="mt-2 text-sm text-red-500">
+            {{ errors.amount[0] }}
           </p>
         </div>
       </div>
