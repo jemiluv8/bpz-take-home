@@ -14,7 +14,7 @@ const props = defineProps({
 </script>
 
 <template>
-  <div className="flex gap-4 align-middle items-center">
+  <div class="flex gap-4 align-middle items-center">
     <PaginationArrow
       direction="left"
       @click="$emit('prev')"

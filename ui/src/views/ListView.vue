@@ -10,6 +10,7 @@ import { useUrlSearchParams, useConfirmDialog } from '@vueuse/core';
 
 const itemsPerPage = 20
 
+// assumes currency in lowers possible denomication - hence division by 100
 const formatCurrency = (amount: number) => {
   return (amount / 100).toLocaleString('en-US', {
     style: 'currency',
@@ -192,52 +193,53 @@ const invoices = computed(() => data ? data.value.data : [])
         <h1 class="text-white font-medium px-6">Create Order</h1>
       </button>
     </section>
-    <Spinner v-show="isLoading || isFetching || isDeleting">Loading</Spinner>
-    <table v-if="!isLoading && !isError" className="hidden min-w-full text-gray-900 md:table mt-6">
-      <thead className="rounded-lg text-left text-sm font-normal bg-gray-300">
+    <h1 class="text-align-right float-right" v-if="isDeleting">Deleting invoice ...</h1>
+    <Spinner v-show="isLoading">Loading</Spinner>
+    <table v-if="!isLoading && !isError" class="hidden min-w-full text-gray-900 md:table mt-6">
+      <thead class="rounded-lg text-left text-sm font-normal bg-gray-300">
         <tr>
-          <th scope="col" className="px-4 py-5 font-bold sm:pl-6">#InvoiceID</th>
-          <th scope="col" className="px-4 py-5 font-bold sm:pl-6">Customer</th>
-          <th scope="col" className="px-3 py-5 font-bold">Email</th>
-          <th scope="col" className="px-3 py-5 font-bold">Amount</th>
-          <th scope="col" className="px-3 py-5 font-bold">Date</th>
-          <th scope="col" className="px-3 py-5 font-bold">Status</th>
-          <th scope="col" className="relative py-3 pl-6 pr-3">
+          <th scope="col" class="px-4 py-5 font-bold sm:pl-6">#InvoiceID</th>
+          <th scope="col" class="px-4 py-5 font-bold sm:pl-6">Customer</th>
+          <th scope="col" class="px-3 py-5 font-bold">Email</th>
+          <th scope="col" class="px-3 py-5 font-bold">Amount</th>
+          <th scope="col" class="px-3 py-5 font-bold">Date</th>
+          <th scope="col" class="px-3 py-5 font-bold">Status</th>
+          <th scope="col" class="relative py-3 pl-6 pr-3">
            Actions
           </th>
         </tr>
       </thead>
 
-      <tbody className="bg-white border-b">
+      <tbody class="bg-white border-b">
         <tr
           v-for="invoice of invoices"
           :key="invoice.customer_id"
-          className="w-full border-b py-3 text-sm last-of-type:border-none [&:first-child>td:first-child]:rounded-tl-lg [&:first-child>td:last-child]:rounded-tr-lg [&:last-child>td:first-child]:rounded-bl-lg [&:last-child>td:last-child]:rounded-br-lg"
+          class="w-full border-b py-3 text-sm last-of-type:border-none [&:first-child>td:first-child]:rounded-tl-lg [&:first-child>td:last-child]:rounded-tr-lg [&:last-child>td:first-child]:rounded-bl-lg [&:last-child>td:last-child]:rounded-br-lg"
         >
-          <td className="whitespace-nowrap py-3 pl-6 pr-3">
-            <div className="flex items-center gap-3">
+          <td class="whitespace-nowrap py-3 pl-6 pr-3">
+            <div class="flex items-center gap-3">
               <p>{{invoice.invoiceId}}</p>
             </div>
           </td>
-          <td className="whitespace-nowrap py-3 pl-6 pr-3">
-            <div className="flex items-center gap-3">
+          <td class="whitespace-nowrap py-3 pl-6 pr-3">
+            <div class="flex items-center gap-3">
               <p>{{invoice.name || invoice.customerName}}</p>
             </div>
           </td>
-          <td className="whitespace-nowrap px-3 py-3">{{invoice.email || invoice.customerEmail}}</td>
-          <td className="whitespace-nowrap px-3 py-3">
+          <td class="whitespace-nowrap px-3 py-3">{{invoice.email || invoice.customerEmail}}</td>
+          <td class="whitespace-nowrap px-3 py-3">
             {{ formatCurrency(invoice.amount) }}
           </td>
-          <td className="whitespace-nowrap px-3 py-3">{{formatDateToLocal(invoice.date)}}</td>
-          <td className="whitespace-nowrap px-3 py-3">
+          <td class="whitespace-nowrap px-3 py-3">{{formatDateToLocal(invoice.date)}}</td>
+          <td class="whitespace-nowrap px-3 py-3">
             {{invoice.status}}
           </td>
           <td >
             <span class="flex flex-grow h-full items-center justify-center align-middle gap-2">
-              <span>
+              <router-link :to="{ name: 'edit-invoice', params: { customerId: invoice.CustomerID, invoiceId: invoice.INVOICE_ID } }">
                 <Edit :size="20" class="text-blue-500" />
                 <!-- Edit -->
-              </span>
+              </router-link>
               <span @click="() => handleDelete(invoice)">
                 <Trash2 :size="20" class="text-red-500" />
                 <!-- Delete -->
@@ -251,7 +253,7 @@ const invoices = computed(() => data ? data.value.data : [])
         <Pagination :has-prev="lastKeys.length > 0" @prev="loadLess" @next="loadMore" :has-more-data="!!data.lastEvaluatedKey" />
       </tfoot>
     </table>
-    <div class="flex flex-col justify-center align-middle items-center" v-else>
+    <div class="flex flex-col justify-center align-middle items-center" v-else-if="isError">
       <p v-if="error && error.message">{{ error.message }}</p>
       <h3 class="text-lg">There was an error loading data</h3> <br />
       <button class="flex p-2 px-3 rounded-lg text-white bg-blue-600 hover:bg-blue-500 items-center" @click="() => refetch()">
