@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { useRoute, useRouter } from 'vue-router'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/vue-query'
-import { RefreshCcw } from 'lucide-vue-next'
+import { ArrowLeft, RefreshCcw } from 'lucide-vue-next'
 import { computed } from 'vue'
 import InvoiceForm from '@/components/InvoiceForm.vue'
 import Spinner from '@/components/Spinner.vue';
@@ -107,7 +107,16 @@ const handleFormSubmit = async (formData: any) => {
     </div>
 
     <div v-else-if="data" class="m-5">
-      <h2>Edit Invoice #{{ data.invoiceId }}</h2>
+      <div class="flex items-center gap-5 my-2 py-5 bg-white">
+        <router-link to="#" @click.prevent="router.back()" class="flex gap-3 my-2 text-black">
+          <ArrowLeft color="black"/>
+          <span class="text-black">
+            List Invoices
+          </span>
+        </router-link>
+        <span>/</span>
+        <h2>Invoice #{{ data.invoiceId }}</h2>
+      </div>
       <!-- <pre>{{ JSON.stringify(data, null, 2) }}</pre> -->
      <InvoiceForm
         :submitHandler="handleFormSubmit"
