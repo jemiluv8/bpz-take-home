@@ -5,10 +5,10 @@ import type { UseMutationOptions } from '@tanstack/vue-query'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/vue-query'
 import { Edit, RefreshCcw, Trash2 } from 'lucide-vue-next'
 import { computed } from 'vue'
-import { useRoute, useRouter } from 'vue-router'
+import { useRoute, useRouter, type LocationQueryValue } from 'vue-router'
 import { useUrlSearchParams, useConfirmDialog } from '@vueuse/core'
 
-const itemsPerPage = 20
+const itemsPerPage = 10
 
 // assumes currency in lowers possible denomication - hence division by 100
 const formatCurrency = (amount: number) => {
@@ -35,7 +35,19 @@ const status = computed({
     urlParams.status = newKey
   },
 })
+
+const pages = computed({
+  get: () => route.query.pages || [],
+  set: (pages: any) => {
+    urlParams.pages = pages
+  },
+})
 const pathname = computed(() => route.path)
+
+/**
+ * Decided to store last keys in the url
+ * Only caveat is that we don't know how to proceed
+ */
 
 const makeQueryString = (extraParams: Record<string, any>) => {
   const currentParams: Record<string, any> = {
@@ -44,11 +56,18 @@ const makeQueryString = (extraParams: Record<string, any>) => {
     ...extraParams,
   }
 
+  Object.keys(currentParams).forEach((k) => {
+    if (currentParams[k] === undefined) {
+      delete currentParams[k]
+    }
+  })
+
   const params = new URLSearchParams(currentParams)
   return params.toString()
 }
 
 const createPageURL = (extraParams: Record<string, any>) => {
+  console.log("extraParams", extraParams)
   return `${pathname.value}?${makeQueryString(extraParams)}`
 }
 const rootUrl = 'https://8bktci9d17.execute-api.us-east-1.amazonaws.com/invoices'
@@ -59,6 +78,7 @@ const awsApiUrl = computed(() => {
 console.log({
   awsApiUrl,
   lastEvaluatedKey: route.query.lastEvaluatedKey,
+  pages: pages.value
 })
 
 const queryKey: any[] = ['invoices', { lastEvaluatedKey, status }]
@@ -87,13 +107,28 @@ const formatDateToLocal = (dateStr: string, locale: string = 'en-US') => {
 }
 
 const loadMore = () => {
-  const { lastEvaluatedKey } = data.value || {}
-  if (lastEvaluatedKey) {
-    router.push(createPageURL({ lastEvaluatedKey: data.value.lastEvaluatedKey }))
+  const nextKeyObject = data.value?.lastEvaluatedKey;
+
+  if (nextKeyObject) {
+    const historyPages = [...pages.value];
+
+    historyPages.push(nextKeyObject);
+
+    pages.value = historyPages
+
+    router.push({
+        query: {
+            ...route.query,
+            lastEvaluatedKey: nextKeyObject,
+            pages: historyPages
+        }
+    });
+
   } else {
-    alert('No more data to load')
+    alert('No more data to load');
   }
-}
+};
+
 
 async function deleteItemApi(invoiceIdentifier: string): Promise<DeleteSuccessResponse> {
   const deleteEndpoint = `${rootUrl}/${invoiceIdentifier}`
@@ -144,10 +179,8 @@ const { isRevealed, reveal, confirm, cancel } = useConfirmDialog()
 async function handleDelete(row: any) {
   const { isCanceled } = await reveal()
   if (!isCanceled) {
-    console.log('Row Identifier', `${row.CustomerID}/${row.INVOICE_ID}`)
     const safeCustomerId = encodeURIComponent(row.CustomerID)
     const safeInvoiceId = encodeURIComponent(row.INVOICE_ID)
-    // const safeUrl = encodeURIComponent(`${row.CustomerID}/${row.INVOICE_ID}`)
     deleteItem(`${safeCustomerId}/${safeInvoiceId}`)
   }
 }
@@ -160,11 +193,27 @@ console.log({
 })
 
 const loadLess = () => {
-  // FIX ME - last keys are not persisted accross page reloads. Do better
-  if (lastKeys.length > 1) {
-    lastKeys.pop()
-    const prev = lastKeys.pop()
-    router.push(createPageURL({ lastEvaluatedKey: prev }))
+  if (pages.value.length > 0) {
+    const historyPages = [...pages.value];
+    historyPages.pop();
+
+    const prevKeyString = historyPages[historyPages.length - 1] || undefined;
+
+    pages.value = historyPages;
+
+    console.log("historyPages", historyPages)
+    console.log("pages", pages)
+
+    router.push({
+        query: {
+            ...route.query,
+            pages: historyPages,
+            lastEvaluatedKey: prevKeyString
+        }
+    });
+
+  } else {
+     console.warn("Cannot go back further in pagination history.");
   }
 }
 
@@ -174,8 +223,6 @@ const statusChangedHandler = (ev: Event) => {
   status.value = selectedValue
   router.push(createPageURL({ status: selectedValue }))
 }
-
-console.log('lastKeys', lastKeys)
 
 const invoices = computed(() => (data ? data.value.data : []))
 </script>
@@ -270,7 +317,7 @@ const invoices = computed(() => (data ? data.value.data : []))
 
       <tfoot class="pt-5 block w-full">
         <Pagination
-          :has-prev="lastKeys.length > 0"
+          :has-prev="!!pages && pages.length > 0"
           @prev="loadLess"
           @next="loadMore"
           :has-more-data="!!data.lastEvaluatedKey"
