@@ -1,12 +1,12 @@
 <script setup lang="ts">
-import Pagination from '@/components/Pagination.vue';
-import Spinner from '@/components/Spinner.vue';
-import type { UseMutationOptions } from "@tanstack/vue-query"
-import { useMutation, useQuery, useQueryClient } from '@tanstack/vue-query';
+import Pagination from '@/components/Pagination.vue'
+import Spinner from '@/components/Spinner.vue'
+import type { UseMutationOptions } from '@tanstack/vue-query'
+import { useMutation, useQuery, useQueryClient } from '@tanstack/vue-query'
 import { Edit, RefreshCcw, Trash2 } from 'lucide-vue-next'
-import { computed } from "vue";
-import { useRoute, useRouter } from 'vue-router';
-import { useUrlSearchParams, useConfirmDialog } from '@vueuse/core';
+import { computed } from 'vue'
+import { useRoute, useRouter } from 'vue-router'
+import { useUrlSearchParams, useConfirmDialog } from '@vueuse/core'
 
 const itemsPerPage = 20
 
@@ -29,10 +29,20 @@ const lastEvaluatedKey = computed({
     urlParams.lastEvaluatedKey = newKey
   },
 })
+const status = computed({
+  get: () => route.query.status || undefined,
+  set: (newKey: string) => {
+    urlParams.status = newKey
+  },
+})
 const pathname = computed(() => route.path)
 
 const makeQueryString = (extraParams: Record<string, any>) => {
-  const currentParams: Record<string, any> = { pageSize: itemsPerPage, ...urlParams, ...extraParams }
+  const currentParams: Record<string, any> = {
+    pageSize: itemsPerPage,
+    ...urlParams,
+    ...extraParams,
+  }
 
   const params = new URLSearchParams(currentParams)
   return params.toString()
@@ -41,98 +51,81 @@ const makeQueryString = (extraParams: Record<string, any>) => {
 const createPageURL = (extraParams: Record<string, any>) => {
   return `${pathname.value}?${makeQueryString(extraParams)}`
 }
-const rootUrl = "https://8bktci9d17.execute-api.us-east-1.amazonaws.com/invoices"
-// const mockApiUrl = `http://0.0.0.0:9909/invoices?page=${currentPage.value}&pageSize=${itemsPerPage}`
+const rootUrl = 'https://8bktci9d17.execute-api.us-east-1.amazonaws.com/invoices'
 const awsApiUrl = computed(() => {
-  console.log("route", route.query)
   return `${rootUrl}?${makeQueryString(route.query)}`
 })
 
 console.log({
   awsApiUrl,
-  lastEvaluatedKey: route.query.lastEvaluatedKey
+  lastEvaluatedKey: route.query.lastEvaluatedKey,
 })
 
-const queryKey: any[] = ['invoices', { lastEvaluatedKey }]
+const queryKey: any[] = ['invoices', { lastEvaluatedKey, status }]
 
-const { isLoading, isFetching, isError, data, error, refetch } = useQuery({
+const { isLoading, isError, data, error, refetch } = useQuery({
   staleTime: 5 * 60 * 1000,
   queryKey,
-  queryFn: () => fetch(awsApiUrl.value).then(response => response.json()),
+  queryFn: () => fetch(awsApiUrl.value).then((response) => response.json()),
 })
 
 if (data && data.value && data.value.lastEvaluatedKey) {
   lastKeys.push(data.value.lastEvaluatedKey)
 }
 
-console.log("data.value", data.value)
+console.log('data.value', queryKey)
 
-const formatDateToLocal = (
-  dateStr: string,
-  locale: string = 'en-US',
-) => {
-  const date = new Date(dateStr);
+const formatDateToLocal = (dateStr: string, locale: string = 'en-US') => {
+  const date = new Date(dateStr)
   const options: Intl.DateTimeFormatOptions = {
     day: 'numeric',
     month: 'short',
     year: 'numeric',
-  };
-  const formatter = new Intl.DateTimeFormat(locale, options);
-  return formatter.format(date);
-};
+  }
+  const formatter = new Intl.DateTimeFormat(locale, options)
+  return formatter.format(date)
+}
 
 const loadMore = () => {
   const { lastEvaluatedKey } = data.value || {}
   if (lastEvaluatedKey) {
     router.push(createPageURL({ lastEvaluatedKey: data.value.lastEvaluatedKey }))
   } else {
-    alert("No more data to load")
+    alert('No more data to load')
   }
 }
 
-async function deleteItemApi (invoiceIdentifier: string): Promise<DeleteSuccessResponse> {
-  console.log(`[API] Attempting to delete item with ID: ${invoiceIdentifier}`);
+async function deleteItemApi(invoiceIdentifier: string): Promise<DeleteSuccessResponse> {
   const deleteEndpoint = `${rootUrl}/${invoiceIdentifier}`
-  console.log("Delete endpoint", deleteEndpoint, rootUrl)
-
-  const response = await fetch(deleteEndpoint, { method: "DELETE" })
+  const response = await fetch(deleteEndpoint, { method: 'DELETE' })
   const jsonResponse = await response.json()
-  console.log(`[API] Item with ID ${invoiceIdentifier} deleted successfully.`);
-  return { success: true, deletedId: invoiceIdentifier, ...jsonResponse };
-};
-
-const queryClient = useQueryClient();
-interface DeleteSuccessResponse {
-  success: boolean;
-  deletedId: string;
+  return { success: true, deletedId: invoiceIdentifier, ...jsonResponse }
 }
 
-// Interface for the error response (optional, but good practice)
+const queryClient = useQueryClient()
+interface DeleteSuccessResponse {
+  success: boolean
+  deletedId: string
+}
+
 interface DeleteErrorResponse {
-  message: string;
-  // Add other error properties if your API returns them
+  message: string
 }
 
 const mutationOptions: UseMutationOptions<DeleteSuccessResponse, DeleteErrorResponse, string> = {
   onSuccess: (data) => {
-    console.log('Mutation successful!', data);
-    // Invalidate queries that depend on the list of items
-    // queryClient.invalidateQueries(['invoices']);
+    console.log('Mutation successful!', data)
     queryClient.invalidateQueries({ queryKey: ['invoices'] })
   },
 
-  onError: (error, variables, context) => {
-    console.error('Mutation failed!', error);
-    // 'error' is now typed as DeleteErrorResponse
-    // You can access error.message safely
+  onError: (error) => {
+    console.error('Mutation failed!', error)
   },
 
-  onSettled: (data, error, variables, context) => {
-    console.log('Mutation settled (success or failure)');
-    // 'data' is DeleteSuccessResponse | undefined
-    // 'error' is DeleteErrorResponse | undefined
-  }
-};
+  onSettled: (data, error) => {
+    console.log('Mutation settled (success or failure)', data, error)
+  },
+}
 
 const {
   isPending: isDeleting,
@@ -140,23 +133,18 @@ const {
   isError: deletionError,
   isSuccess: deletionSuccess,
   error: deleteError, // This is now typed as Ref<DeleteErrorResponse | null>
-  data: deleteResponse   // This is now typed as Ref<DeleteSuccessResponse | undefined>
+  data: deleteResponse, // This is now typed as Ref<DeleteSuccessResponse | undefined>
 } = useMutation<DeleteSuccessResponse, DeleteErrorResponse, string>({
   mutationFn: deleteItemApi,
-  ...mutationOptions
-});
+  ...mutationOptions,
+})
 
-const {
-  isRevealed,
-  reveal,
-  confirm,
-  cancel,
-} = useConfirmDialog()
+const { isRevealed, reveal, confirm, cancel } = useConfirmDialog()
 
 async function handleDelete(row: any) {
-  const { data, isCanceled } = await reveal()
+  const { isCanceled } = await reveal()
   if (!isCanceled) {
-    console.log("Row Identifier", `${row.CustomerID}/${row.INVOICE_ID}`)
+    console.log('Row Identifier', `${row.CustomerID}/${row.INVOICE_ID}`)
     const safeCustomerId = encodeURIComponent(row.CustomerID)
     const safeInvoiceId = encodeURIComponent(row.INVOICE_ID)
     // const safeUrl = encodeURIComponent(`${row.CustomerID}/${row.INVOICE_ID}`)
@@ -168,7 +156,7 @@ console.log({
   deletionError,
   deletionSuccess,
   deleteError,
-  deleteResponse
+  deleteResponse,
 })
 
 const loadLess = () => {
@@ -180,16 +168,44 @@ const loadLess = () => {
   }
 }
 
-console.log("lastKeys", lastKeys)
+const statusChangedHandler = (ev: Event) => {
+  const selectElement = ev.target as HTMLSelectElement;
+  const selectedValue = selectElement.value;
+  status.value = selectedValue
+  router.push(createPageURL({ status: selectedValue }))
+}
 
-const invoices = computed(() => data ? data.value.data : [])
+console.log('lastKeys', lastKeys)
+
+const invoices = computed(() => (data ? data.value.data : []))
 </script>
 
 <template>
   <main class="mt-12 h-full">
-    <section class="flex justify-between mb-6 py-6">
-      <h3 class="text-lg">Orders</h3>
-      <button @click="$router.push('/new-order')" class="flex h-10 items-center rounded-lg bg-blue-600 transition-colors hover:bg-blue-500 focus-visible:outline focus-visible:outline-offset-2 focus-visible:outline-blue-600">
+    <section class="flex justify-between items-center align-middle mb-6 py-6">
+      <div class="mb-4">
+        <label htmlFor="status-filter" class="mb-2 block text-sm font-medium">
+          Status
+        </label>
+        <div>
+          <select
+            id="status-filter"
+            name="status-filter"
+            :value="status"
+            @change="statusChangedHandler"
+            class="block w-fit rounded-md border border-gray-200 py-2 px-3 text-sm outline-2 focus:border-blue-500 focus:ring focus:ring-blue-500 focus:ring-opacity-50"
+          >
+            <option value="">All</option>
+            <option value="pending">Pending</option>
+            <option value="paid">Paid</option>
+            <option value="overdue">Overdue</option>
+          </select>
+        </div>
+      </div>
+      <button
+        @click="$router.push('/new-order')"
+        class="flex h-10 items-center rounded-lg bg-blue-600 transition-colors hover:bg-blue-500 focus-visible:outline focus-visible:outline-offset-2 focus-visible:outline-blue-600"
+      >
         <h1 class="text-white font-medium px-6">Create Order</h1>
       </button>
     </section>
@@ -204,9 +220,7 @@ const invoices = computed(() => data ? data.value.data : [])
           <th scope="col" class="px-3 py-5 font-bold">Amount</th>
           <th scope="col" class="px-3 py-5 font-bold">Date</th>
           <th scope="col" class="px-3 py-5 font-bold">Status</th>
-          <th scope="col" class="relative py-3 pl-6 pr-3">
-           Actions
-          </th>
+          <th scope="col" class="relative py-3 pl-6 pr-3">Actions</th>
         </tr>
       </thead>
 
@@ -218,25 +232,30 @@ const invoices = computed(() => data ? data.value.data : [])
         >
           <td class="whitespace-nowrap py-3 pl-6 pr-3">
             <div class="flex items-center gap-3">
-              <p>{{invoice.invoiceId}}</p>
+              <p>{{ invoice.invoiceId }}</p>
             </div>
           </td>
           <td class="whitespace-nowrap py-3 pl-6 pr-3">
             <div class="flex items-center gap-3">
-              <p>{{invoice.name || invoice.customerName}}</p>
+              <p>{{ invoice.name || invoice.customerName }}</p>
             </div>
           </td>
-          <td class="whitespace-nowrap px-3 py-3">{{invoice.email || invoice.customerEmail}}</td>
+          <td class="whitespace-nowrap px-3 py-3">{{ invoice.email || invoice.customerEmail }}</td>
           <td class="whitespace-nowrap px-3 py-3">
             {{ formatCurrency(invoice.amount) }}
           </td>
-          <td class="whitespace-nowrap px-3 py-3">{{formatDateToLocal(invoice.date)}}</td>
+          <td class="whitespace-nowrap px-3 py-3">{{ formatDateToLocal(invoice.date) }}</td>
           <td class="whitespace-nowrap px-3 py-3">
-            {{invoice.status}}
+            {{ invoice.status }}
           </td>
-          <td >
+          <td>
             <span class="flex flex-grow h-full items-center justify-center align-middle gap-2">
-              <router-link :to="{ name: 'edit-invoice', params: { customerId: invoice.CustomerID, invoiceId: invoice.INVOICE_ID } }">
+              <router-link
+                :to="{
+                  name: 'edit-invoice',
+                  params: { customerId: invoice.CustomerID, invoiceId: invoice.INVOICE_ID },
+                }"
+              >
                 <Edit :size="20" class="text-blue-500" />
                 <!-- Edit -->
               </router-link>
@@ -250,13 +269,22 @@ const invoices = computed(() => data ? data.value.data : [])
       </tbody>
 
       <tfoot class="pt-5 block w-full">
-        <Pagination :has-prev="lastKeys.length > 0" @prev="loadLess" @next="loadMore" :has-more-data="!!data.lastEvaluatedKey" />
+        <Pagination
+          :has-prev="lastKeys.length > 0"
+          @prev="loadLess"
+          @next="loadMore"
+          :has-more-data="!!data.lastEvaluatedKey"
+        />
       </tfoot>
     </table>
     <div class="flex flex-col justify-center align-middle items-center" v-else-if="isError">
       <p v-if="error && error.message">{{ error.message }}</p>
-      <h3 class="text-lg">There was an error loading data</h3> <br />
-      <button class="flex p-2 px-3 rounded-lg text-white bg-blue-600 hover:bg-blue-500 items-center" @click="() => refetch()">
+      <h3 class="text-lg">There was an error loading data</h3>
+      <br />
+      <button
+        class="flex p-2 px-3 rounded-lg text-white bg-blue-600 hover:bg-blue-500 items-center"
+        @click="() => refetch()"
+      >
         <RefreshCcw :size="15" />
         Try again
       </button>
@@ -266,9 +294,7 @@ const invoices = computed(() => data ? data.value.data : [])
         v-if="isRevealed"
         class="fixed inset-0 bg-transparent bg-opacity-0 flex items-center justify-center z-50 shadow-lg"
       >
-        <div
-          class="bg-white p-6 rounded-lg shadow-xl max-w-sm w-full mx-4"
-        >
+        <div class="bg-white p-6 rounded-lg shadow-xl max-w-sm w-full mx-4">
           <h2 class="text-xl font-semibold mb-4">Confirm Action</h2>
 
           <p class="mb-6">Are you sure you want to delete this row?</p>
