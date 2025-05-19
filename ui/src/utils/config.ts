@@ -1,0 +1,1 @@
+export const API_URL = "https://9z0ixfy2s0.execute-api.eu-north-1.amazonaws.com/invoices"

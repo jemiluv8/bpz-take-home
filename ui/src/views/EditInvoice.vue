@@ -1,10 +1,12 @@
 <script setup lang="ts">
-import { useRoute, useRouter } from 'vue-router'
-import { useMutation, useQuery, useQueryClient } from '@tanstack/vue-query'
-import { ArrowLeft, RefreshCcw } from 'lucide-vue-next'
-import { computed } from 'vue'
 import InvoiceForm from '@/components/InvoiceForm.vue'
 import Spinner from '@/components/Spinner.vue';
+
+import { computed } from 'vue'
+import { API_URL } from '@/utils'
+import { useRoute, useRouter } from 'vue-router'
+import { ArrowLeft, RefreshCcw } from 'lucide-vue-next'
+import { useMutation, useQuery, useQueryClient } from '@tanstack/vue-query'
 
 interface InvoiceItem {
   id: number
@@ -29,8 +31,7 @@ const customerId = route.params.customerId as string
 const invoiceId = route.params.invoiceId as string
 
 // Construct the hypothetical URL
-const rootUrl = "https://8bktci9d17.execute-api.us-east-1.amazonaws.com/invoices"
-const invoiceUrl = computed(() => `${rootUrl}/${customerId}/${invoiceId}`)
+const invoiceUrl = computed(() => `${API_URL}/${customerId}/${invoiceId}`)
 
 const updateInvoiceMutation = useMutation({
   mutationFn: async (updateFields: any) => {

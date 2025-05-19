@@ -7,6 +7,7 @@ import { Edit, RefreshCcw, Trash2 } from 'lucide-vue-next'
 import { computed } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useUrlSearchParams, useConfirmDialog } from '@vueuse/core'
+import { API_URL } from '@/utils'
 
 const itemsPerPage = 20
 
@@ -51,14 +52,8 @@ const makeQueryString = (extraParams: Record<string, any>) => {
 const createPageURL = (extraParams: Record<string, any>) => {
   return `${pathname.value}?${makeQueryString(extraParams)}`
 }
-const rootUrl = 'https://8bktci9d17.execute-api.us-east-1.amazonaws.com/invoices'
 const awsApiUrl = computed(() => {
-  return `${rootUrl}?${makeQueryString(route.query)}`
-})
-
-console.log({
-  awsApiUrl,
-  lastEvaluatedKey: route.query.lastEvaluatedKey,
+  return `${API_URL}?${makeQueryString(route.query)}`
 })
 
 const queryKey: any[] = ['invoices', { lastEvaluatedKey, status }]
@@ -96,7 +91,7 @@ const loadMore = () => {
 }
 
 async function deleteItemApi(invoiceIdentifier: string): Promise<DeleteSuccessResponse> {
-  const deleteEndpoint = `${rootUrl}/${invoiceIdentifier}`
+  const deleteEndpoint = `${API_URL}/${invoiceIdentifier}`
   const response = await fetch(deleteEndpoint, { method: 'DELETE' })
   const jsonResponse = await response.json()
   return { success: true, deletedId: invoiceIdentifier, ...jsonResponse }

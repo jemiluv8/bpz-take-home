@@ -1,7 +1,9 @@
 <script setup lang="ts">
-import { useMutation } from '@tanstack/vue-query'
+import { API_URL } from '@/utils'
 import { useRouter } from 'vue-router'
 import { ArrowLeft } from "lucide-vue-next"
+import { useMutation } from '@tanstack/vue-query'
+
 import InvoiceForm from '@/components/InvoiceForm.vue'
 
 const router = useRouter()
@@ -9,7 +11,7 @@ const router = useRouter()
 const createInvoiceMutation = useMutation({
   mutationFn: async (newInvoice: any) => {
     const response = await fetch(
-      'https://8bktci9d17.execute-api.us-east-1.amazonaws.com/invoices',
+      API_URL,
       {
         method: 'POST',
         headers: {
