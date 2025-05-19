@@ -1,40 +1,63 @@
+import * as path from 'path';
 import * as cdk from 'aws-cdk-lib';
-import { Construct } from 'constructs';
-import { join } from "path";
 
-import * as lambda from 'aws-cdk-lib/aws-lambda';
-import * as ssm from 'aws-cdk-lib/aws-ssm';
-import * as apigateway from 'aws-cdk-lib/aws-apigateway';
 import * as iam from 'aws-cdk-lib/aws-iam';
+import * as ssm from 'aws-cdk-lib/aws-ssm';
+import * as dynamodb from 'aws-cdk-lib/aws-dynamodb';
+import * as apigateway from 'aws-cdk-lib/aws-apigateway';
+
+import { Construct } from 'constructs';
 import { NodejsFunction } from 'aws-cdk-lib/aws-lambda-nodejs';
 
 export class CdkStack extends cdk.Stack {
   constructor(scope: Construct, id: string, props?: cdk.StackProps) {
     super(scope, id, props);
 
-    const helloParam = new ssm.StringParameter(this, 'HelloParam', {
-      parameterName: '/cdk/hello',
-      stringValue: 'Very Secret Parameter Store Value',
+    // 1. DynamoDB table with CUSTOMER_ID and INVOICE_ID
+    const table = new dynamodb.Table(this, 'InvoicesTable', {
+      partitionKey: { name: 'CUSTOMER_ID', type: dynamodb.AttributeType.STRING },
+      sortKey: { name: 'INVOICE_ID', type: dynamodb.AttributeType.STRING },
+      billingMode: dynamodb.BillingMode.PAY_PER_REQUEST,
+      removalPolicy: cdk.RemovalPolicy.DESTROY,
     });
 
-  const helloLambda = new NodejsFunction(this, 'HelloLambda', {
-    runtime: lambda.Runtime.NODEJS_20_X,
-    entry: join(__dirname, '../lambda/hello.ts'), // path to .ts file
-    handler: 'handler', // export name in the file
-    environment: {
-      PARAM_NAME: helloParam.parameterName,
-    },
-  });
+    // 2. SSM Parameter for the table name
+    const tableParam = new ssm.StringParameter(this, 'TableNameParam', {
+      parameterName: '/cdk-invoices/tableName',
+      stringValue: table.tableName,
+    });
 
-    // Add permission for Lambda to read the SSM param
+    // 3. SSM Parameter for hello message
+    const helloParam = new ssm.StringParameter(this, 'HelloParam', {
+      parameterName: '/cdk-invoices/hello',
+      stringValue: '👋 Hello from Parameter Store!',
+    });
+
+    // 4. Lambda Function
+    const helloLambda = new NodejsFunction(this, 'HelloLambda', {
+      entry: path.join(__dirname, '../lambda/hello.ts'),
+      handler: 'handler',
+      environment: {
+        PARAM_NAME: helloParam.parameterName,
+        TABLE_PARAM_NAME: tableParam.parameterName,
+      },
+    });
+
+    // 5. IAM Permissions for SSM
     helloLambda.addToRolePolicy(new iam.PolicyStatement({
       actions: ['ssm:GetParameter'],
-      resources: [helloParam.parameterArn],
+      resources: [helloParam.parameterArn, tableParam.parameterArn],
     }));
 
-    // Create API Gateway endpoint
+    // 6. IAM Permission: only DescribeTable on the exact table
+    helloLambda.addToRolePolicy(new iam.PolicyStatement({
+      actions: ['dynamodb:DescribeTable'],
+      resources: [table.tableArn],
+    }));
+
+    // 7. API Gateway
     const api = new apigateway.RestApi(this, 'HelloApi', {
-      restApiName: 'Hello World API',
+      restApiName: 'cdk-invoices-api',
     });
 
     api.root.addMethod('GET', new apigateway.LambdaIntegration(helloLambda));
