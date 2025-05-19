@@ -92,6 +92,43 @@ export class CdkStack extends cdk.Stack {
       restApiName: "cdk-invoices-api",
     });
 
+    ///*INVOICES
+    const invoicesLambda = new NodejsFunction(this, "InvoicesLambda", {
+      entry: path.join(__dirname, "../lambda/invoices.ts"), // assuming the file will be named invoices.ts
+      handler: "handler",
+      environment: {
+        TABLE_PARAM_NAME: tableParam.parameterName, // SSM param name
+      },
+    });
+
+    // Grant access to fetch the SSM table name param
+    invoicesLambda.addToRolePolicy(
+      new iam.PolicyStatement({
+        actions: ["ssm:GetParameter"],
+        resources: [tableParam.parameterArn],
+      })
+    );
+
+    // Grant access to query the table and indexes
+    invoicesLambda.addToRolePolicy(
+      new iam.PolicyStatement({
+        actions: ["dynamodb:Query"],
+        resources: [
+          table.tableArn,
+          `${table.tableArn}/index/*`,
+        ],
+      })
+    );
+
+    // API route for /invoices
+    const invoicesResource = api.root.addResource("invoices");
+    invoicesResource.addMethod(
+      "GET",
+      new apigateway.LambdaIntegration(invoicesLambda)
+    );
+
+    //END INVOICES
+
     api.root.addMethod("GET", new apigateway.LambdaIntegration(helloLambda));
   }
 }

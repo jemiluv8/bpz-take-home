@@ -1,20 +1,7 @@
-import { SSM, DynamoDB } from 'aws-sdk';
+import { DynamoDB } from 'aws-sdk';
+import { getParameter } from './utils/ssm';
 
-const ssm = new SSM();
 const dynamodb = new DynamoDB();
-
-// Helper to fetch a parameter from SSM
-async function getParameter(name: string): Promise<{ value: string; error?: string }> {
-  try {
-    const result = await ssm.getParameter({ Name: name }).promise();
-    if (!result.Parameter || !result.Parameter.Value) {
-      throw new Error("not found")
-    }
-    return { value: result.Parameter.Value || "" };
-  } catch (err: any) {
-    return { error: `Failed to fetch parameter "${name}": ${err.message}`, value: "" };
-  }
-}
 
 // Helper to check if we can describe the table
 async function canDescribeTable(tableName: string): Promise<{ accessible: boolean; error?: string }> {
