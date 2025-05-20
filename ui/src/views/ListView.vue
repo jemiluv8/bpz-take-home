@@ -171,7 +171,7 @@ const { isRevealed, reveal, confirm, cancel } = useConfirmDialog()
 async function handleDelete(row: any) {
   const { isCanceled } = await reveal()
   if (!isCanceled) {
-    const safeCustomerId = encodeURIComponent(row.CustomerID)
+    const safeCustomerId = encodeURIComponent(row.CUSTOMER_ID)
     const safeInvoiceId = encodeURIComponent(row.INVOICE_ID)
     deleteItem(`${safeCustomerId}/${safeInvoiceId}`)
   }
@@ -288,7 +288,7 @@ const invoices = computed(() => (data ? data.value.data : []))
               <router-link
                 :to="{
                   name: 'edit-invoice',
-                  params: { customerId: invoice.CustomerID, invoiceId: invoice.INVOICE_ID },
+                  params: { customerId: invoice.CUSTOMER_ID, invoiceId: invoice.INVOICE_ID },
                 }"
               >
                 <Edit :size="20" class="text-blue-500" />
