@@ -4,7 +4,7 @@ import Spinner from '@/components/Spinner.vue'
 import type { UseMutationOptions } from '@tanstack/vue-query'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/vue-query'
 import { Edit, RefreshCcw, Trash2 } from 'lucide-vue-next'
-import { computed } from 'vue'
+import { computed, ref, watch } from 'vue'
 import { useRoute, useRouter, type LocationQueryValue } from 'vue-router'
 import { useUrlSearchParams, useConfirmDialog } from '@vueuse/core'
 import { API_URL } from '@/utils'
@@ -125,8 +125,7 @@ const loadMore = () => {
 async function deleteItemApi(invoiceIdentifier: string): Promise<DeleteSuccessResponse> {
   const deleteEndpoint = `${API_URL}/${invoiceIdentifier}`
   const response = await fetch(deleteEndpoint, { method: 'DELETE' })
-  const jsonResponse = await response.json()
-  return { success: true, deletedId: invoiceIdentifier, ...jsonResponse }
+  return { success: response.ok, deletedId: invoiceIdentifier }
 }
 
 const queryClient = useQueryClient()
@@ -159,8 +158,7 @@ const {
   mutate: deleteItem,
   isError: deletionError,
   isSuccess: deletionSuccess,
-  error: deleteError, // This is now typed as Ref<DeleteErrorResponse | null>
-  data: deleteResponse, // This is now typed as Ref<DeleteSuccessResponse | undefined>
+  error: deleteError,
 } = useMutation<DeleteSuccessResponse, DeleteErrorResponse, string>({
   mutationFn: deleteItemApi,
   ...mutationOptions,
@@ -176,13 +174,6 @@ async function handleDelete(row: any) {
     deleteItem(`${safeCustomerId}/${safeInvoiceId}`)
   }
 }
-
-console.log({
-  deletionError,
-  deletionSuccess,
-  deleteError,
-  deleteResponse,
-})
 
 const loadLess = () => {
   if (pages.value.length > 0) {
@@ -213,6 +204,17 @@ const statusChangedHandler = (ev: Event) => {
 }
 
 const invoices = computed(() => (data ? data.value.data : []))
+const showBanner = ref(true); // Control the visibility of the banner
+
+// Watch for changes in deletionSuccess
+watch(deletionSuccess, (newValue) => {
+  if (newValue) {
+    showBanner.value = true; // Show the banner when deletion is successful
+    setTimeout(() => {
+      showBanner.value = false; // Hide the banner after 5 seconds
+    }, 5000);
+  }
+});
 </script>
 
 <template>
@@ -241,10 +243,13 @@ const invoices = computed(() => (data ? data.value.data : []))
         <h1 class="text-white font-medium px-6">Create Order</h1>
       </button>
     </section>
-    <h1 class="text-align-right float-right" v-if="isDeleting">Deleting invoice ...</h1>
-    <h1 v-if="deletionError" class="text-align-right float-right">
+    <div v-if="isDeleting" class="text-align-right w-full bg-red-500 text-white p-3">Deleting invoice ...</div>
+    <div v-if="deletionError" class="text-align-right w-full bg-red-500 text-white p-3">
       {{ deleteError?.message || "There was an unexpected error deleting the row" }}
-    </h1>
+    </div>
+    <div v-if="deletionSuccess && showBanner" class="mb-2 w-full bg-green-500 text-white p-3">
+      Invoice deleted
+    </div>
     <Spinner v-show="isLoading">Loading</Spinner>
     <table v-if="!isLoading && !isError" class="hidden min-w-full text-gray-900 md:table mt-6">
       <thead class="rounded-lg text-left text-sm font-normal bg-gray-300">

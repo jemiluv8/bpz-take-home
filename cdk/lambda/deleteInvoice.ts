@@ -31,7 +31,7 @@ export const handler = async (event: any) => {
 
     return {
       statusCode: 204,
-      body: "", // No content
+      body: JSON.stringify({ message: "Invoice deleted" }), // No content
     };
   } catch (e: any) {
     console.error("Delete failed:", e);
