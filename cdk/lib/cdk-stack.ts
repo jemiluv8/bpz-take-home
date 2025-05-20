@@ -247,6 +247,39 @@ export class CdkStack extends cdk.Stack {
       ),
     });
 
+    const createInvoiceLambda = new NodejsFunction(this, "CreateInvoiceLambda", {
+      entry: path.join(__dirname, "../lambda/createInvoice.ts"),
+      handler: "handler",
+      environment: {
+        TABLE_PARAM_NAME: tableParam.parameterName,
+      },
+    });
+
+    createInvoiceLambda.addToRolePolicy(
+      new iam.PolicyStatement({
+        actions: ["ssm:GetParameter"],
+        resources: [tableParam.parameterArn],
+      })
+    );
+
+    createInvoiceLambda.addToRolePolicy(
+      new iam.PolicyStatement({
+        actions: ["dynamodb:PutItem"],
+        resources: [table.tableArn],
+      })
+    );
+
+    const createInvoiceIntegration = new integrations.HttpLambdaIntegration(
+      "CreateInvoiceIntegration",
+      createInvoiceLambda
+    );
+
+    api.addRoutes({
+      path: "/invoices",
+      methods: [apigatewayv2.HttpMethod.POST],
+      integration: createInvoiceIntegration,
+    });
+
     //END INVOICES
 
     api.addRoutes({

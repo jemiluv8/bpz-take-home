@@ -68,7 +68,7 @@ const makeQueryString = (extraParams: Record<string, any>) => {
 }
 
 const createPageURL = (extraParams: Record<string, any>) => {
-  console.log("extraParams", extraParams)
+  console.log('extraParams', extraParams)
   return `${pathname.value}?${makeQueryString(extraParams)}`
 }
 const awsApiUrl = computed(() => {
@@ -101,28 +101,26 @@ const formatDateToLocal = (dateStr: string, locale: string = 'en-US') => {
 }
 
 const loadMore = () => {
-  const nextKeyObject = data.value?.lastEvaluatedKey;
+  const nextKeyObject = data.value?.lastEvaluatedKey
 
   if (nextKeyObject) {
-    const historyPages = [...pages.value];
+    const historyPages = [...pages.value]
 
-    historyPages.push(nextKeyObject);
+    historyPages.push(nextKeyObject)
 
     pages.value = historyPages
 
     router.push({
-        query: {
-            ...route.query,
-            lastEvaluatedKey: nextKeyObject,
-            pages: historyPages
-        }
-    });
-
+      query: {
+        ...route.query,
+        lastEvaluatedKey: nextKeyObject,
+        pages: historyPages,
+      },
+    })
   } else {
-    alert('No more data to load');
+    alert('No more data to load')
   }
-};
-
+}
 
 async function deleteItemApi(invoiceIdentifier: string): Promise<DeleteSuccessResponse> {
   const deleteEndpoint = `${API_URL}/${invoiceIdentifier}`
@@ -188,32 +186,28 @@ console.log({
 
 const loadLess = () => {
   if (pages.value.length > 0) {
-    const historyPages = [...pages.value];
-    historyPages.pop();
+    const historyPages = [...pages.value]
+    historyPages.pop()
 
-    const prevKeyString = historyPages[historyPages.length - 1] || undefined;
+    const prevKeyString = historyPages[historyPages.length - 1] || undefined
 
-    pages.value = historyPages;
-
-    console.log("historyPages", historyPages)
-    console.log("pages", pages)
+    pages.value = historyPages
 
     router.push({
-        query: {
-            ...route.query,
-            pages: historyPages,
-            lastEvaluatedKey: prevKeyString
-        }
-    });
-
+      query: {
+        ...route.query,
+        pages: historyPages,
+        lastEvaluatedKey: prevKeyString,
+      },
+    })
   } else {
-     console.warn("Cannot go back further in pagination history.");
+    console.warn('Cannot go back further in pagination history.')
   }
 }
 
 const statusChangedHandler = (ev: Event) => {
-  const selectElement = ev.target as HTMLSelectElement;
-  const selectedValue = selectElement.value;
+  const selectElement = ev.target as HTMLSelectElement
+  const selectedValue = selectElement.value
   status.value = selectedValue
   router.push(createPageURL({ status: selectedValue }))
 }
@@ -225,9 +219,6 @@ const invoices = computed(() => (data ? data.value.data : []))
   <main class="mt-12 h-full">
     <section class="flex justify-between items-center align-middle mb-6 py-6">
       <div class="mb-4">
-        <label htmlFor="status-filter" class="mb-2 block text-sm font-medium">
-          Status
-        </label>
         <div>
           <select
             id="status-filter"
@@ -251,6 +242,9 @@ const invoices = computed(() => (data ? data.value.data : []))
       </button>
     </section>
     <h1 class="text-align-right float-right" v-if="isDeleting">Deleting invoice ...</h1>
+    <h1 v-if="deletionError" class="text-align-right float-right">
+      {{ deleteError?.message || "There was an unexpected error deleting the row" }}
+    </h1>
     <Spinner v-show="isLoading">Loading</Spinner>
     <table v-if="!isLoading && !isError" class="hidden min-w-full text-gray-900 md:table mt-6">
       <thead class="rounded-lg text-left text-sm font-normal bg-gray-300">

@@ -248,13 +248,13 @@ const CheckIcon = {
       </div>
     </div>
 
-    <div class="mt-6 flex justify-end gap-4">
-      <RouterLink
-        to="/dashboard/invoices"
-        class="flex h-10 items-center rounded-lg bg-gray-100 px-4 text-sm font-medium text-gray-600 transition-colors hover:bg-gray-200"
+    <div class="mt-6 flex justify-end gap-4 py-5">
+      <button
+        to="/"
+        class="flex h-10 items-center rounded-lg bg-gray-100 px-12 text-sm font-medium text-red-600 transition-colors hover:bg-gray-200"
       >
         Cancel
-      </RouterLink>
+      </button>
       <button
         type="submit"
         class="flex h-10 items-center rounded-lg bg-blue-500 px-4 text-sm font-medium text-white transition-colors hover:bg-blue-400 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-500 active:bg-blue-600 aria-disabled:cursor-not-allowed aria-disabled:opacity-50"
