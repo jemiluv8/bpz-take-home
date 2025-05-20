@@ -1,291 +1,190 @@
 import * as path from "path";
 import * as cdk from "aws-cdk-lib";
-
+import { Construct } from "constructs";
+import { NodejsFunction } from "aws-cdk-lib/aws-lambda-nodejs";
 import * as iam from "aws-cdk-lib/aws-iam";
 import * as ssm from "aws-cdk-lib/aws-ssm";
 import * as dynamodb from "aws-cdk-lib/aws-dynamodb";
-import * as apigateway from "aws-cdk-lib/aws-apigateway";
-
-import { Construct } from "constructs";
-import { NodejsFunction } from "aws-cdk-lib/aws-lambda-nodejs";
-
-import * as apigatewayv2 from "aws-cdk-lib/aws-apigatewayv2"; // BREAKING
-import * as integrations from "aws-cdk-lib/aws-apigatewayv2-integrations"; // BREAKING
+import * as apigatewayv2 from "aws-cdk-lib/aws-apigatewayv2";
+import * as integrations from "aws-cdk-lib/aws-apigatewayv2-integrations";
 
 export class CdkStack extends cdk.Stack {
   constructor(scope: Construct, id: string, props?: cdk.StackProps) {
     super(scope, id, props);
 
-    // 1. DynamoDB table with CUSTOMER_ID and INVOICE_ID
-    const table = new dynamodb.Table(this, "InvoicesTable", {
-      partitionKey: {
-        name: "CUSTOMER_ID",
-        type: dynamodb.AttributeType.STRING,
-      },
+    // ==========================
+    // DynamoDB: Invoices Table
+    // ==========================
+    const invoicesTable = new dynamodb.Table(this, "InvoicesTable", {
+      partitionKey: { name: "CUSTOMER_ID", type: dynamodb.AttributeType.STRING },
       sortKey: { name: "INVOICE_ID", type: dynamodb.AttributeType.STRING },
       billingMode: dynamodb.BillingMode.PAY_PER_REQUEST,
       removalPolicy: cdk.RemovalPolicy.DESTROY,
     });
 
-    // Add Global Secondary Indexes
-    table.addGlobalSecondaryIndex({
-      indexName: "GSI_CustomerIDStatusDate",
-      partitionKey: { name: "CustomerID", type: dynamodb.AttributeType.STRING },
-      sortKey: { name: "StatusDate", type: dynamodb.AttributeType.STRING },
-      projectionType: dynamodb.ProjectionType.ALL,
-    });
-
-    table.addGlobalSecondaryIndex({
-      indexName: "GSI_PK_STATUS__SK_DATE",
-      partitionKey: { name: "PK_STATUS", type: dynamodb.AttributeType.STRING },
-      sortKey: { name: "SK_DATE", type: dynamodb.AttributeType.STRING },
-      projectionType: dynamodb.ProjectionType.ALL,
-    });
-
-    table.addGlobalSecondaryIndex({
-      indexName: "INVOICE_DATE_INDEX",
-      partitionKey: {
-        name: "PK2_INVOICE",
-        type: dynamodb.AttributeType.STRING,
+    const secondaryIndexes = [
+      {
+        indexName: "GSI_CustomerIDStatusDate",
+        partitionKey: { name: "CustomerID", type: dynamodb.AttributeType.STRING },
+        sortKey: { name: "StatusDate", type: dynamodb.AttributeType.STRING },
       },
-      sortKey: { name: "SK2_Date", type: dynamodb.AttributeType.STRING },
-      projectionType: dynamodb.ProjectionType.ALL,
-    });
+      {
+        indexName: "GSI_PK_STATUS__SK_DATE",
+        partitionKey: { name: "PK_STATUS", type: dynamodb.AttributeType.STRING },
+        sortKey: { name: "SK_DATE", type: dynamodb.AttributeType.STRING },
+      },
+      {
+        indexName: "INVOICE_DATE_INDEX",
+        partitionKey: { name: "PK2_INVOICE", type: dynamodb.AttributeType.STRING },
+        sortKey: { name: "SK2_Date", type: dynamodb.AttributeType.STRING },
+      },
+    ];
 
-    // 2. SSM Parameter for the table name
+    for (const idx of secondaryIndexes) {
+      invoicesTable.addGlobalSecondaryIndex({
+        indexName: idx.indexName,
+        partitionKey: idx.partitionKey,
+        sortKey: idx.sortKey,
+        projectionType: dynamodb.ProjectionType.ALL,
+      });
+    }
+
+    // ==========================
+    // SSM Parameters
+    // ==========================
     const tableParam = new ssm.StringParameter(this, "TableNameParam", {
       parameterName: "/cdk-invoices/tableName",
-      stringValue: table.tableName,
+      stringValue: invoicesTable.tableName,
     });
 
-    // 3. SSM Parameter for hello message
     const helloParam = new ssm.StringParameter(this, "HelloParam", {
       parameterName: "/cdk-invoices/hello",
       stringValue: "👋 Hello from Parameter Store!",
     });
 
-    // 4. Lambda Function
-    const helloLambda = new NodejsFunction(this, "HelloLambda", {
-      entry: path.join(__dirname, "../lambda/hello.ts"),
-      handler: "handler",
-      environment: {
-        PARAM_NAME: helloParam.parameterName,
+    // ==========================
+    // Helper: Lambda Factory
+    // ==========================
+    const createLambda = (
+      id: string,
+      file: string,
+      env: Record<string, string>,
+    ): NodejsFunction =>
+      new NodejsFunction(this, id, {
+        entry: path.join(__dirname, `../lambda/${file}`),
+        handler: "handler",
+        environment: env,
+      });
+
+    const addSSMAccess = (fn: NodejsFunction, params: ssm.IParameter[]) =>
+      fn.addToRolePolicy(
+        new iam.PolicyStatement({
+          actions: ["ssm:GetParameter"],
+          resources: params.map((p) => p.parameterArn),
+        }),
+      );
+
+    const addDynamoAccess = (
+      fn: NodejsFunction,
+      actions: string[],
+      resources: string[],
+    ) =>
+      fn.addToRolePolicy(
+        new iam.PolicyStatement({ actions, resources }),
+      );
+
+    // ==========================
+    // Lambda: Hello
+    // ==========================
+    const helloLambda = createLambda("HelloLambda", "hello.ts", {
+      PARAM_NAME: helloParam.parameterName,
+      TABLE_PARAM_NAME: tableParam.parameterName,
+    });
+    addSSMAccess(helloLambda, [helloParam, tableParam]);
+    addDynamoAccess(helloLambda, ["dynamodb:DescribeTable"], [invoicesTable.tableArn]);
+
+    // ==========================
+    // Lambda: Invoices CRUD
+    // ==========================
+    const invoiceLambdas = {
+      list: createLambda("InvoicesLambda", "invoices.ts", {
         TABLE_PARAM_NAME: tableParam.parameterName,
-      },
-    });
+      }),
+      create: createLambda("CreateInvoiceLambda", "createInvoice.ts", {
+        TABLE_PARAM_NAME: tableParam.parameterName,
+      }),
+      get: createLambda("GetInvoiceLambda", "getInvoice.ts", {
+        TABLE_PARAM_NAME: tableParam.parameterName,
+      }),
+      update: createLambda("UpdateInvoiceLambda", "updateInvoice.ts", {
+        TABLE_PARAM_NAME: tableParam.parameterName,
+      }),
+      delete: createLambda("DeleteInvoiceLambda", "deleteInvoice.ts", {
+        TABLE_PARAM_NAME: tableParam.parameterName,
+      }),
+    };
 
-    // 5. IAM Permissions for SSM
-    helloLambda.addToRolePolicy(
-      new iam.PolicyStatement({
-        actions: ["ssm:GetParameter"],
-        resources: [helloParam.parameterArn, tableParam.parameterArn],
-      })
-    );
+    addSSMAccess(invoiceLambdas.list, [tableParam]);
+    addDynamoAccess(invoiceLambdas.list, ["dynamodb:Query"], [
+      invoicesTable.tableArn,
+      `${invoicesTable.tableArn}/index/*`,
+    ]);
 
-    // 6. IAM Permission: only DescribeTable on the exact table
-    helloLambda.addToRolePolicy(
-      new iam.PolicyStatement({
-        actions: ["dynamodb:DescribeTable"],
-        resources: [table.tableArn],
-      })
-    );
+    addSSMAccess(invoiceLambdas.create, [tableParam]);
+    addDynamoAccess(invoiceLambdas.create, ["dynamodb:PutItem"], [invoicesTable.tableArn]);
 
-    ///*INVOICES
-    const invoicesLambda = new NodejsFunction(this, "InvoicesLambda", {
-      entry: path.join(__dirname, "../lambda/invoices.ts"), // assuming the file will be named invoices.ts
-      handler: "handler",
-      environment: {
-        TABLE_PARAM_NAME: tableParam.parameterName, // SSM param name
-      },
-    });
+    addSSMAccess(invoiceLambdas.get, [tableParam]);
+    addDynamoAccess(invoiceLambdas.get, ["dynamodb:GetItem"], [invoicesTable.tableArn]);
 
-    // Grant access to fetch the SSM table name param
-    invoicesLambda.addToRolePolicy(
-      new iam.PolicyStatement({
-        actions: ["ssm:GetParameter"],
-        resources: [tableParam.parameterArn],
-      })
-    );
+    addSSMAccess(invoiceLambdas.update, [tableParam]);
+    addDynamoAccess(invoiceLambdas.update, ["dynamodb:UpdateItem"], [invoicesTable.tableArn]);
 
-    // Grant access to query the table and indexes
-    invoicesLambda.addToRolePolicy(
-      new iam.PolicyStatement({
-        actions: ["dynamodb:Query"],
-        resources: [table.tableArn, `${table.tableArn}/index/*`],
-      })
-    );
+    addSSMAccess(invoiceLambdas.delete, [tableParam]);
+    addDynamoAccess(invoiceLambdas.delete, ["dynamodb:DeleteItem"], [invoicesTable.tableArn]);
 
+    // ==========================
+    // API Gateway v2 HTTP API
+    // ==========================
     const api = new apigatewayv2.HttpApi(this, "HttpInvoiceApi", {
       apiName: "cdk-invoices-http-api",
       corsPreflight: {
         allowHeaders: ["content-type"],
-        allowMethods: [
-          apigatewayv2.CorsHttpMethod.GET,
-          apigatewayv2.CorsHttpMethod.POST,
-          apigatewayv2.CorsHttpMethod.PUT,
-          apigatewayv2.CorsHttpMethod.DELETE,
-          apigatewayv2.CorsHttpMethod.PATCH,
-          apigatewayv2.CorsHttpMethod.OPTIONS,
-          apigatewayv2.CorsHttpMethod.HEAD,
-        ],
+        allowMethods: Object.values(apigatewayv2.CorsHttpMethod),
         allowOrigins: ["http://localhost:5173"],
         exposeHeaders: ["content-type", "accept"],
       },
     });
 
-    api.addRoutes({
-      path: "/invoices",
-      methods: [apigatewayv2.HttpMethod.GET],
-      integration: new integrations.HttpLambdaIntegration(
-        "InvoicesIntegration",
-        invoicesLambda
-      ),
-    });
-
-    // DELETE LAMBRA
-    const deleteInvoiceLambda = new NodejsFunction(
-      this,
-      "DeleteInvoiceLambda",
+    const routes = [
+      { path: "/", method: apigatewayv2.HttpMethod.GET, lambda: helloLambda },
+      { path: "/invoices", method: apigatewayv2.HttpMethod.GET, lambda: invoiceLambdas.list },
+      { path: "/invoices", method: apigatewayv2.HttpMethod.POST, lambda: invoiceLambdas.create },
       {
-        entry: path.join(__dirname, "../lambda/deleteInvoice.ts"),
-        handler: "handler",
-        environment: {
-          TABLE_PARAM_NAME: tableParam.parameterName,
-        },
-      }
-    );
-
-    // Allow Lambda to read the table name
-    deleteInvoiceLambda.addToRolePolicy(
-      new iam.PolicyStatement({
-        actions: ["ssm:GetParameter"],
-        resources: [tableParam.parameterArn],
-      })
-    );
-
-    // Allow delete access to DynamoDB table
-    deleteInvoiceLambda.addToRolePolicy(
-      new iam.PolicyStatement({
-        actions: ["dynamodb:DeleteItem"],
-        resources: [table.tableArn],
-      })
-    );
-
-    api.addRoutes({
-      path: "/invoices/{customerId}/{invoiceId}",
-      methods: [apigatewayv2.HttpMethod.DELETE],
-      integration: new integrations.HttpLambdaIntegration(
-        "DeleteInvoiceIntegration",
-        deleteInvoiceLambda
-      ),
-    });
-
-    // Create the Lambda
-    const getInvoiceLambda = new NodejsFunction(this, "GetInvoiceLambda", {
-      entry: path.join(__dirname, "../lambda/getInvoice.ts"),
-      handler: "handler",
-      environment: {
-        TABLE_PARAM_NAME: tableParam.parameterName,
+        path: "/invoices/{customerId}/{invoiceId}",
+        method: apigatewayv2.HttpMethod.GET,
+        lambda: invoiceLambdas.get,
       },
-    });
-
-    // Grant SSM read access for table name
-    getInvoiceLambda.addToRolePolicy(
-      new iam.PolicyStatement({
-        actions: ["ssm:GetParameter"],
-        resources: [tableParam.parameterArn],
-      })
-    );
-
-    // Grant DynamoDB read access
-    getInvoiceLambda.addToRolePolicy(
-      new iam.PolicyStatement({
-        actions: ["dynamodb:GetItem"],
-        resources: [table.tableArn],
-      })
-    );
-
-    api.addRoutes({
-      path: "/invoices/{customerId}/{invoiceId}",
-      methods: [apigatewayv2.HttpMethod.GET],
-      integration: new integrations.HttpLambdaIntegration(
-        "GetInvoiceIntegration",
-        getInvoiceLambda
-      ),
-    });
-
-    // PUT INVOICE
-    const patchInvoiceLambda = new NodejsFunction(this, "UpdateInvoiceLambda", {
-      entry: path.join(__dirname, "../lambda/updateInvoice.ts"),
-      handler: "handler",
-      environment: {
-        TABLE_PARAM_NAME: tableParam.parameterName,
+      {
+        path: "/invoices/{customerId}/{invoiceId}",
+        method: apigatewayv2.HttpMethod.PATCH,
+        lambda: invoiceLambdas.update,
       },
-    });
-
-    patchInvoiceLambda.addToRolePolicy(
-      new iam.PolicyStatement({
-        actions: ["ssm:GetParameter"],
-        resources: [tableParam.parameterArn],
-      })
-    );
-
-    // Allow update access to DynamoDB
-    patchInvoiceLambda.addToRolePolicy(
-      new iam.PolicyStatement({
-        actions: ["dynamodb:UpdateItem"],
-        resources: [table.tableArn],
-      })
-    );
-
-    api.addRoutes({
-      path: "/invoices/{customerId}/{invoiceId}",
-      methods: [apigatewayv2.HttpMethod.PATCH],
-      integration: new integrations.HttpLambdaIntegration(
-        "UpdateInvoiceIntegration",
-        patchInvoiceLambda
-      ),
-    });
-
-    const createInvoiceLambda = new NodejsFunction(this, "CreateInvoiceLambda", {
-      entry: path.join(__dirname, "../lambda/createInvoice.ts"),
-      handler: "handler",
-      environment: {
-        TABLE_PARAM_NAME: tableParam.parameterName,
+      {
+        path: "/invoices/{customerId}/{invoiceId}",
+        method: apigatewayv2.HttpMethod.DELETE,
+        lambda: invoiceLambdas.delete,
       },
-    });
+    ];
 
-    createInvoiceLambda.addToRolePolicy(
-      new iam.PolicyStatement({
-        actions: ["ssm:GetParameter"],
-        resources: [tableParam.parameterArn],
-      })
-    );
-
-    createInvoiceLambda.addToRolePolicy(
-      new iam.PolicyStatement({
-        actions: ["dynamodb:PutItem"],
-        resources: [table.tableArn],
-      })
-    );
-
-    const createInvoiceIntegration = new integrations.HttpLambdaIntegration(
-      "CreateInvoiceIntegration",
-      createInvoiceLambda
-    );
-
-    api.addRoutes({
-      path: "/invoices",
-      methods: [apigatewayv2.HttpMethod.POST],
-      integration: createInvoiceIntegration,
-    });
-
-    //END INVOICES
-
-    api.addRoutes({
-      path: "/",
-      methods: [apigatewayv2.HttpMethod.GET],
-      integration: new integrations.HttpLambdaIntegration("Root", helloLambda),
-    });
+    for (const route of routes) {
+      api.addRoutes({
+        path: route.path,
+        methods: [route.method],
+        integration: new integrations.HttpLambdaIntegration(
+          `${route.lambda.node.id}Integration`,
+          route.lambda,
+        ),
+      });
+    }
   }
 }
