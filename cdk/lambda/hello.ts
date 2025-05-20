@@ -14,16 +14,7 @@ async function canDescribeTable(tableName: string): Promise<{ accessible: boolea
 }
 
 export const handler = async () => {
-  const helloParamName = process.env.PARAM_NAME!;
   const tableParamName = process.env.TABLE_PARAM_NAME!;
-
-  const { value: helloMessage, error: helloError } = await getParameter(helloParamName);
-  if (helloError) {
-    return {
-      statusCode: 500,
-      body: JSON.stringify({ error: helloError }),
-    };
-  }
 
   const { value: tableName, error: tableError } = await getParameter(tableParamName);
   if (tableError) {
@@ -38,7 +29,6 @@ export const handler = async () => {
   return {
     statusCode: 200,
     body: JSON.stringify({
-      message: helloMessage,
       tableName,
       connection: accessible,
       dynamoError: accessible ? undefined : dynamoError,

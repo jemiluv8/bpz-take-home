@@ -36,7 +36,7 @@ export const handler = async (event: any) => {
     const generateCustomerId = () => {
       const hash = createHash('sha256');
       hash.update(email);
-      return hash.digest('hex').substring(0, 12);
+      return hash.digest('hex').substring(0, 24);
     };
 
     status = status.toLowerCase();
@@ -55,7 +55,7 @@ export const handler = async (event: any) => {
       invoiceId,
 
       // GSI 1
-      CustomerID: `CUSTOMER-${email}`,
+      CustomerID: `CUSTOMER-${customerId}`,
       StatusDate: `status#${status}#date#${date}`,
 
       // GSI 2
