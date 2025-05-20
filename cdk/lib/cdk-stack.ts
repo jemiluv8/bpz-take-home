@@ -177,7 +177,7 @@ export class CdkStack extends cdk.Stack {
       integration: new integrations.HttpLambdaIntegration(
         "DeleteInvoiceIntegration",
         deleteInvoiceLambda
-     ),
+      ),
     });
 
     // Create the Lambda
@@ -211,6 +211,39 @@ export class CdkStack extends cdk.Stack {
       integration: new integrations.HttpLambdaIntegration(
         "GetInvoiceIntegration",
         getInvoiceLambda
+      ),
+    });
+
+    // PUT INVOICE
+    const patchInvoiceLambda = new NodejsFunction(this, "UpdateInvoiceLambda", {
+      entry: path.join(__dirname, "../lambda/updateInvoice.ts"),
+      handler: "handler",
+      environment: {
+        TABLE_PARAM_NAME: tableParam.parameterName,
+      },
+    });
+
+    patchInvoiceLambda.addToRolePolicy(
+      new iam.PolicyStatement({
+        actions: ["ssm:GetParameter"],
+        resources: [tableParam.parameterArn],
+      })
+    );
+
+    // Allow update access to DynamoDB
+    patchInvoiceLambda.addToRolePolicy(
+      new iam.PolicyStatement({
+        actions: ["dynamodb:UpdateItem"],
+        resources: [table.tableArn],
+      })
+    );
+
+    api.addRoutes({
+      path: "/invoices/{customerId}/{invoiceId}",
+      methods: [apigatewayv2.HttpMethod.PATCH],
+      integration: new integrations.HttpLambdaIntegration(
+        "UpdateInvoiceIntegration",
+        patchInvoiceLambda
       ),
     });
 

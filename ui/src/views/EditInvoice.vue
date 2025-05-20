@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import InvoiceForm from '@/components/InvoiceForm.vue'
 import Spinner from '@/components/Spinner.vue';
+import InvoiceForm from '@/components/InvoiceForm.vue'
 
 import { computed } from 'vue'
 import { API_URL } from '@/utils'
@@ -36,7 +36,7 @@ const invoiceUrl = computed(() => `${API_URL}/${customerId}/${invoiceId}`)
 const updateInvoiceMutation = useMutation({
   mutationFn: async (updateFields: any) => {
     const response = await fetch(invoiceUrl.value, {
-      method: 'PUT',
+      method: 'PATCH',
       headers: {
         'Content-Type': 'application/json',
       },
